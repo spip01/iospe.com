@@ -36,12 +36,34 @@ function wrapper () {
 		b += "<td><input id='noteColor' type='color' value=" + localStorage.noteColor + " /></td><td>Box color</td></tr>";
 		b += "<tr><td><input id='hideMapTip' type='checkbox' " + (localStorage.hideMapTip == "true" ? "checked='true'" : "") + " /></td><td>Hide Map Tip</td></tr>";
 		b += "</table></div>";
+
+//		b += "<tr><td><input id='noteColorStart' type='color' onchange='vgap.dash.changingColors()' value=" + localStorage.noteColorStart + " />&nbsp;&nbsp;Start color";
+//		b += "    &nbsp;&nbsp;<input id='noteColorEnd' type='color' onchange='vgap.dash.changingColors()' value=" + localStorage.noteColorEnd + " />&nbsp;&nbsp;End color</td>";
 		
 		$('[onclick="vgap.resetTurn();"]').after(b);
 
 	    this.pane.jScrollPane();
 	};
 
+/*
+	vgapDashboard.prototype.changingColors = function() {
+        if (this.notePaper == undefined) {
+	        this.notePaper = Raphael("noteCanvas", 160, 80);
+	        this.noteCanvas = this.notePaper.set();
+        }
+        
+        if (this.notePaper) {
+		    var s = $("#notesOptions #noteColorStart").val();
+		    var e = $("#notesOptions #noteColorEnd").val();
+	        var r = {fill:"r"+s+"-"+e, "fill-opacity":1};
+	        var l = {fill:"0-"+s+"-"+e, "fill-opacity":1};
+		    
+		    this.noteCanvas.clear();
+	        this.noteCanvas.push(this.notePaper.circle(40, 40, 40).attr(r));
+	        this.noteCanvas.push(this.notePaper.circle(120, 40, 40).attr(l));
+        }
+	};
+*/
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
@@ -71,8 +93,9 @@ function wrapper () {
 	};
 		
 	vgapMap.prototype.drawNotes = function() {		// make the box red instead of yellow
-	    vgap.map.notes.remove();
-	    vgap.map.notes = vgap.map.paper.set();
+		if (this.notes == undefined)
+			this.notes = this.paper.set();
+        this.notes.clear();
 	    
 	    if (localStorage.noteDisplay == "true") {
 		    for (var c = 0; c < vgap.notes.length; c++) {

@@ -19,7 +19,11 @@ function wrapper () { // wrapper for injection
         b += "<li onclick='vgap.loadCompleteHistory();'>Load History</li>";
         
         $("#MapTools li:contains('Measure')").after(b);
-           
+          
+        vgap.map.setColors();
+	};
+    
+	vgapMap.prototype.setColors = function () {
         vgap.map.colorsA = [];
         vgap.map.colorsA2 = [];
         vgap.map.colorsA[0]  = "hsl(0,0,128)";
@@ -30,7 +34,7 @@ function wrapper () { // wrapper for injection
         	vgap.map.colorsA2[i] = "hsl("+(i/vgap.game.slots*239)+",240,32)";
         }
 	};
-    
+	
 	vgaPlanets.prototype.loadCompleteHistory = function () {
 	    var b = "<div id='rNav'></div>";
 		$("#PlanetsContainer").append(b);
@@ -291,6 +295,7 @@ function wrapper () { // wrapper for injection
                 this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
             }
         }
+        
         if (vgap.stars) {
             for (var p = 0; p < vgap.stars.length; p++) {
                 var S = vgap.stars[p];
@@ -324,14 +329,30 @@ function wrapper () { // wrapper for injection
         	var planet = vgap.planets[i];
             var x = this.screenX(planet.x);
             var y = this.screenY(planet.y);
-            var G = Math.min(30, Math.max(6 * this.zoom, 3));
-            var c = {fill:"0-"+vgap.map.colorsA[planet.ownerid]+"-"+vgap.map.colorsA2[planet.ownerid]};
             
-            if (planet.debrisdisk >= 1) {
+            if (planet.debrisdisk > 1) {
             	G = planet.debrisdisk * this.zoom;
-            	if (planet.debrisdisk > 1)
-            		c = {fill:"r gray-black", "fill-opacity":.01, "stroke-opacity":0};
+            	if (planet.debrisdisk > 1) {
+                    var s  = "#483400";
+                    var e  = "#241200";
+            		c = {fill:"r "+s+"-"+e, "fill-opacity":.01, "stroke-opacity":0};
+            		this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
+            	}
             }
+        }
+        
+        for (var i = 0; i < vgap.planets.length; ++i) {                            
+        	var planet = vgap.planets[i];
+            var x = this.screenX(planet.x);
+            var y = this.screenY(planet.y);
+            
+            var G = Math.min(30, Math.max(6 * this.zoom, 3));
+            var c = {fill:"0-"+vgap.map.colorsA[planet.ownerid]+"-"+vgap.map.colorsA2[planet.ownerid], "fill-opacity":1};
+            
+            if (planet.debrisdisk > 1) 
+            	continue;
+            if (planet.debrisdisk == 1) 
+            	G = this.zoom;
 
             this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
         }
@@ -451,9 +472,8 @@ function wrapper () { // wrapper for injection
         
         for (var b = 0; b < vgap.ionstorms.length; b++) {
             var d = vgap.ionstorms[b];
-            var a = "yellow";
             
-            var c = 0.05;
+            var c = 0.5;
             if (d.voltage >= 50) 
                 c = 0.075;
             if (d.voltage >= 100) 
@@ -463,11 +483,20 @@ function wrapper () { // wrapper for injection
             if (d.voltage >= 200) 
                 c = 0.2;
 
-            this.ionstorms.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr({fill:a,"fill-opacity": c, "stroke-opacity":0}));
+            var s  = "#707000";
+            var e  = "#202000";
+             
+            var a = {fill:"r"+s+"-"+e, "fill-opacity":c/10, "stroke-opacity":0};
+
+            this.ionstorms.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
+        }
+        
+        for (var b = 0; b < vgap.ionstorms.length; b++) {
+            var d = vgap.ionstorms[b];
             
             var e = d.x + Math.round(Math.sin(Math.toRad(d.heading)) * d.warp * d.warp);
             var f = d.y + Math.round(Math.cos(Math.toRad(d.heading)) * d.warp * d.warp);
-            this.ionstorms.push(this.paper.path("M" + this.screenX(d.x) + " " + this.screenY(d.y) + "L" + this.screenX(e) + " " + this.screenY(f)).attr({stroke: a,"stroke-width": "1","stroke-opacity": c * 2}));
+            this.ionstorms.push(this.paper.path("M" + this.screenX(d.x) + " " + this.screenY(d.y) + "L" + this.screenX(e) + " " + this.screenY(f)).attr({stroke: "yellow","stroke-width": 1,"stroke-opacity": .25}));
 	    }
     };
     

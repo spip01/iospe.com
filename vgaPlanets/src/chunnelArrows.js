@@ -25,9 +25,10 @@ function wrapper () {
         this.controls.css("marginTop", "-" + this.controls.height() + "px");
         
     	vgap.map.zoom = zoomTable[localStorage.startZoom] / 100;
-    	vgap.map.centerX = localStorage.startX;
-    	vgap.map.centerY = localStorage.startY;
-	    
+	    vgap.map.centerX = Number(localStorage.startX);
+    	vgap.map.centerY = Number(localStorage.startY);
+    	
+    	vgap.map.setColors();
     };
 
     vgaPlanets.prototype.deselectAll = function() {
@@ -166,44 +167,68 @@ function wrapper () {
 		oldSaveSettings.apply(this,arguments);
 	};
 	
+	vgapMap.prototype.setColors = function () {
+        vgap.map.colorsA = [];
+        vgap.map.colorsA2 = [];
+        vgap.map.colorsA[0]  = "hsl(0,0,128)";
+        vgap.map.colorsA2[0] = "hsl(0,0,16)";
+    	
+        for (var i=1; i<=vgap.game.slots; ++i) {
+        	vgap.map.colorsA[i]  = "hsl("+(i/vgap.game.slots*239)+",240,128)";
+        	vgap.map.colorsA2[i] = "hsl("+(i/vgap.game.slots*239)+",240,32)";
+        }
+	};
+
 	vgapMap.prototype.zoomWayIn = function() {
 		vgap.map.zoom = 40;
 		vgap.map.updateZoom();
 	};
 	
-	var oldDrawWaypoints = vgapMap.prototype.drawWaypoints;
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-		if (localStorage.filterZoom == "true" && this.zoom == 40 && (ship = vgap.map.activeShip) != null) {
-	        this.waypoints.remove();
+		if (this.waypoints == undefined)
 			this.waypoints = this.paper.set();
+        this.waypoints.clear();
+		var d;
 			
+        if (localStorage.filterZoom == "true" && this.zoom == 40 && (ship = vgap.map.activeShip) != null) {
 			var dist = vgap.map.getDist(ship.targetx, ship.targety, this.centerX, this.centerY);
 			if (dist > 10)
 				this.centerMap(ship.targetx, ship.targety);
 			
-	        var d = {"stroke": localStorage.hypColor, "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-opacity": 0.5};
+	        d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-opacity": 0.5};
             if (vgap.isHyping(ship))
-            	d = {"stroke": localStorage.hypColor, "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
+            	d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
             this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
             return;
 		}
-        else
-			oldDrawWaypoints.apply(this, arguments);
 		
-		for (var i=0; i<vgap.myships.length; ++i) {
-			var ship = vgap.myships[i];
-			if (localStorage.waypointChunnel == "true" && vgap.isChunnelling(ship)) {
+		for (var i=0; i<vgap.ships.length; ++i) {
+			var ship = vgap.ships[i];
+			if (vgap.isChunnelling(ship)) {
             	var m = Number(ship.friendlycode);
                 var to = vgap.getShip(m);
-                var d = {"stroke":localStorage.chunnelColor, "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-dasharray":"-", "stroke-opacity":0.5};
+                	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "stroke-dasharray":"-", "stroke-opacity":0.5};
+	                if (localStorage.waypointChunnel == "true")
+	                	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-dasharray":"-", "stroke-opacity":0.5};
                 this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
             	   
             }
-            if (localStorage.waypointHYP == "true" && vgap.isHyping(ship)) {
-                var d = {"stroke": localStorage.hypColor, "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
+			else if (vgap.isHyping(ship)) {
+            	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "stroke-dasharray":".", "stroke-opacity":0.5};
+                if (localStorage.waypointHYP == "true")
+                	d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
 	            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
             }
+			else {
+	            var k = vgap.getSpeed(ship.warp, ship.hullid);
+	            if (k && ship.heading != -1) {
+		            var n = ship.x + Math.round(Math.sin(Math.toRad(ship.heading)) * k);
+		            var o = ship.y + Math.round(Math.cos(Math.toRad(ship.heading)) * k);
+	                d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
+		            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(n) + " " + this.screenY(o)).attr(d));
+				}
+			}
         }
 	};
 	
@@ -215,11 +240,12 @@ function wrapper () {
 	};
 	
     vgapMap.prototype.shipHistory = function (a) {
+		if (this.special == undefined)
+			this.special = this.paper.set();
+		this.special.clear();
+		
 		var ship = vgap.getShip(a);
 		var at = { stroke: localStorage.shipHistoryColor, "stroke-width": 2, "stroke-opacity": .5 };
-
-		vgap.map.notes.remove();
-		vgap.map.notes = vgap.map.paper.set();
 
 		var tox; //= ship.targetx;
 		var toy; //= ship.targety;
@@ -227,7 +253,7 @@ function wrapper () {
 		var fromy = ship.y;
 
 		if (localStorage.warpCircle)
-			vgap.map.notes.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(at));
+			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(at));
 		
 		for (var j = 0; j < localStorage.shipHistoryLength && j < ship.history.length; j++) {
 
@@ -236,7 +262,7 @@ function wrapper () {
 			fromx = ship.history[j].x;
 			fromy = ship.history[j].y;
 			
-			vgap.map.notes.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(at));
+			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(at));
 		}
 	};    
 

@@ -20,9 +20,9 @@ function wrapper () {
 	    	if (localStorage.hyperjumpPlanets == null)
 	    		localStorage.hyperjumpPlanets = "true";
 	    	if (localStorage.planetColor == null)
-	    		localStorage.planetColor = "cyan";
+	    		localStorage.planetColor = "#80ffff";
 	    	if (localStorage.ringColor == null)
-	    		localStorage.ringColor = "cyan";
+	    		localStorage.ringColor = "#80ffff";
     	}
     };
 	
@@ -31,16 +31,16 @@ function wrapper () {
 
 		oldShowSettings.apply(this,arguments);
    
-		var new_html = "<br><h3>HyperJump Circles</h3>";
+		var b = "<br><h3>HyperJump Circles</h3>";
 		
-		new_html += "<div id='hyperjumpOptions'><table>";
-		new_html += "<tr><td><input id='hyperjumpPlanets' type='checkbox'" + (localStorage.hyperjumpPlanets == "true" ? "checked='true'" : "") + "/></td><td>Mark planets in jump range</td>";
-		new_html += "<td>        <input id='planetColor' type='color' value=" + localStorage.planetColor + " /></td><td>Marked planet color</td></tr>";
-		new_html += "<tr><td><input id='hyperjumpRing' type='checkbox'" + (localStorage.hyperjumpRing == "true" ? "checked='true'" : "") + "/></td><td>Draw double ring at jump radius</td>";
-		new_html += "<td>        <input id='ringColor' type='color' value=" + localStorage.ringColor + " /></td><td>Ring color</td></tr>";
-		new_html += "</table></div>";
+		b += "<div id='hyperjumpOptions'><table>";
+		b += "<tr><td><input id='hyperjumpPlanets' type='checkbox'" + (localStorage.hyperjumpPlanets == "true" ? "checked='true'" : "") + "/></td><td>Mark planets in jump range</td>";
+		b += "<td><input id='planetColor' type='color' value=" + localStorage.planetColor + " /></td><td>Marked planet color</td></tr>";
+		b += "<tr><td><input id='hyperjumpRing' type='checkbox'" + (localStorage.hyperjumpRing == "true" ? "checked='true'" : "") + "/></td><td>Draw double ring at jump radius</td>";
+		b += "<td><input id='ringColor' type='color' value=" + localStorage.ringColor + " /></td><td>Ring color</td></tr>";
+		b += "</table></div>";
    
-		$('[onclick="vgap.resetTurn();"]').after(new_html);
+		$('[onclick="vgap.resetTurn();"]').after(b);
 
 	    this.pane.jScrollPane();
 	};
@@ -52,13 +52,13 @@ function wrapper () {
 	        localStorage[$(this).attr("id")] = $(this).is(":checked");
 	    });
 	    
-	    $("#hyperjumpOptions #planetColor").each(function(a) {	// :color isn't working
-	        localStorage[$(this).attr("id")] = $(this).val();
-	    });
+//	 	:color doesn't work yet
+//	    $("#hyperjumpOptions :color").each(function(a) {
+//	        localStorage[$(this).attr("id")] = $(this).val();
+//	    });
 	    
-	    $("#hyperjumpOptions #ringColor").each(function(a) {	// :color isn't working
-	        localStorage[$(this).attr("id")] = $(this).val();
-	    });
+	    localStorage.planetColor = $("#hyperjumpOptions #planetColor").val();
+	    localStorage.ringColor = $("#hyperjumpOptions #ringColor").val();
 	    
 		oldSaveSettings.apply(this,arguments);
 	};
