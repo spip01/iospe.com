@@ -1,0 +1,12 @@
+{
+   "name": "test",
+   "version": "0.0.1",
+   "manifest_version": 2,
+   
+   "content_scripts": [ {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "include_globs": [ "http://planets.nu/home*", "http://planets.nu/games*", "http://play.planets.nu/*" ],
+      "js": [ "notesDisplay.js", "chunnelArrows.js", "checkReady.js", "hyperJump.js", "checkStarBase.js" ],
+      "run_at": "document_idle"
+   } ]
+ }
