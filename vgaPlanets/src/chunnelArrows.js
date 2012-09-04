@@ -27,8 +27,6 @@ function wrapper () {
     	vgap.map.zoom = zoomTable[localStorage.startZoom] / 100;
 	    vgap.map.centerX = Number(localStorage.startX);
     	vgap.map.centerY = Number(localStorage.startY);
-    	
-    	vgap.map.setColors();
     };
 
     vgaPlanets.prototype.deselectAll = function() {
@@ -165,18 +163,6 @@ function wrapper () {
     	vgap.map.centerY = Number(localStorage.startY);
     	
 		oldSaveSettings.apply(this,arguments);
-	};
-	
-	vgapMap.prototype.setColors = function () {
-        vgap.map.colorsA = [];
-        vgap.map.colorsA2 = [];
-        vgap.map.colorsA[0]  = "hsl(0,0,128)";
-        vgap.map.colorsA2[0] = "hsl(0,0,16)";
-    	
-        for (var i=1; i<=vgap.game.slots; ++i) {
-        	vgap.map.colorsA[i]  = "hsl("+(i/vgap.game.slots*239)+",240,128)";
-        	vgap.map.colorsA2[i] = "hsl("+(i/vgap.game.slots*239)+",240,32)";
-        }
 	};
 
 	vgapMap.prototype.zoomWayIn = function() {
