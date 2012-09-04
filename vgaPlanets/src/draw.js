@@ -4,8 +4,47 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.loadControls = function () {
 
 		oldLoadControls.apply(this, arguments);
+		
+    	if(typeof(Storage)!=="undefined") {
+	    	if (localStorage["colors.E0"] == null) {
+	    		this.setColors();
+	    	}
+    	}
+   };
+	
+	vgapMap.prototype.setColors = function () {
+		localStorage["colors.S0"] = "#808080";
+		localStorage["colors.E0"] = "#101010";
+   	
+		for (var i=1; i<=vgap.game.slots; ++i) {
+			var s = i / vgap.game.slots * 2 * Math.PI;
+ 			
+			var r = (Math.cos(s) + 1) * 127;
+			var g = (Math.cos(s + 2 * Math.PI / 3) + 1) * 127;
+			var b = (Math.cos(s + 4 * Math.PI / 3) + 1) * 127;
+			
+			var rs = "0" + Number(r.toFixed(0)).toString(16);
+			var gs = "0" + Number(g.toFixed(0)).toString(16);
+			var bs = "0" + Number(b.toFixed(0)).toString(16);
+			
+			var rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
+			
+			localStorage["colors.S" + i] = rgb;
+			
+			r *= .6;
+			g *= .6;
+			b *= .6;
+			
+			rs = "0" + Number(r.toFixed(0)).toString(16);
+			gs = "0" + Number(g.toFixed(0)).toString(16);
+			bs = "0" + Number(b.toFixed(0)).toString(16);
+			
+			rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
+			
+			localStorage["colors.E" + i] = rgb;
+		}
 	};
-    
+    	    
 	vgapMap.prototype.draw = function() {
 	    this.paper.safari();
 	    vgap.connectionsActivated = 0;
@@ -129,8 +168,8 @@ function wrapper () { // wrapper for injection
             if (planet.debrisdisk > 1) {
             	G = planet.debrisdisk * this.zoom;
             	if (planet.debrisdisk > 1) {
-                    var s  = "#483400";
-                    var e  = "#241200";
+                    var s  = "#462300";
+                    var e  = "#2b1500";
             		c = {fill:"r "+s+"-"+e, "fill-opacity":.01, "stroke-opacity":0};
             		this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
             	}
@@ -142,13 +181,13 @@ function wrapper () { // wrapper for injection
             var x = this.screenX(planet.x);
             var y = this.screenY(planet.y);
             
-            var G = Math.min(30, Math.max(6 * this.zoom, 3));
-            var c = {fill:"0-"+vgap.map.colorsA[planet.ownerid]+"-"+vgap.map.colorsA2[planet.ownerid], "fill-opacity":1};
+            var G = Math.min(24, Math.max(6 * this.zoom, 3));
+            var c = {fill:"0-"+localStorage["colors.S"+planet.ownerid]+"-"+localStorage["colors.E"+planet.ownerid], "fill-opacity":1};
             
             if (planet.debrisdisk > 1) 
             	continue;
             if (planet.debrisdisk == 1) 
-            	G = this.zoom;
+                G = Math.min(8, Math.max(2 * this.zoom, 1.5));
 
             this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
         }
@@ -195,7 +234,7 @@ function wrapper () { // wrapper for injection
     		
 			for (var k=0; k<l.length; ++k) {
 			    var s = l[k];
-    			c = {fill:vgap.map.colorsA[s.ownerid]};
+    			c = {fill:localStorage["colors.S"+s.ownerid]};
     			var el = vgap.map.paper.rect(x, y, G, G).attr(c);
     			this.ships.push(el.transform("r"+k*45+t));
 			}
@@ -215,14 +254,14 @@ function wrapper () { // wrapper for injection
 				if (vgap.isChunnelling(ship)) {
 	            	var m = Number(ship.friendlycode);
 	                var to = vgap.getShip(m);
-                	d = {"stroke":vgap.map.colorsA[ship.ownerid], "stroke-width":2, "stroke-dasharray":"-", "stroke-opacity":0.5};
+                	d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-dasharray":"-", "stroke-opacity":0.5};
 	                this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
 				}
 				else {
 					if (vgap.isHyping(ship)) 
-						d = {"stroke":vgap.map.colorsA[ship.ownerid], "stroke-width":2, "stroke-dasharray":".", "stroke-opacity":0.5};
+						d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-dasharray":".", "stroke-opacity":0.5};
 					else
-						d = {"stroke":vgap.map.colorsA[ship.ownerid], "stroke-width":2, "stroke-opacity":0.5};
+						d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-opacity":0.5};
 	            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
 				}
 			}
@@ -231,7 +270,7 @@ function wrapper () { // wrapper for injection
 	            if (k && ship.heading != -1) {
 		            var n = ship.x + Math.round(Math.sin(Math.toRad(ship.heading)) * k);
 		            var o = ship.y + Math.round(Math.cos(Math.toRad(ship.heading)) * k);
-	                d = {"stroke":vgap.map.colorsA[ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
+	                d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
 		            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(n) + " " + this.screenY(o)).attr(d));
 				}
 			}
@@ -303,7 +342,7 @@ function wrapper () { // wrapper for injection
 
     	for (var c = 0; c < vgap.minefields.length; c++) {
             var d = vgap.minefields[c];
-            var b = vgap.map.colorsA[d.ownerid];
+            var b = localStorage["colors.S"+d.ownerid];
             var a = {stroke: b,"stroke-width": "1","stroke-opacity": 0.5,fill: b,"fill-opacity": 0.2};
             this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
         }

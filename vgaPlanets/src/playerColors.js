@@ -14,112 +14,79 @@ function wrapper () {
     	
     	oldProcessLoad.apply(this,arguments);
     	
-    	if(typeof(Storage)!=="undefined") {
-	    	if (localStorage["colors.S0"] == null) {
-	    		this.setColors();
-	    	}
-    	}
    };
 	
-	vgaPlanets.prototype.setColors = function () {
-		localStorage["colors.S0"]  = "hsl(0,0,128)";
-		localStorage["colors.E0"] = "hsl(0,0,16)";
-    	
-        for (var i=1; i<=vgap.game.slots; ++i) {
-            localStorage["colors.S" + i] = "hsl(" + Number(i / vgap.game.slots * 239).toFixed(0) + ",240,128)";
-            localStorage["colors.E" + i] = "hsl(" + Number(i / vgap.game.slots * 239).toFixed(0) + ",240,32)";
-        }
-	};
-
 	var oldShowSettings = vgapDashboard.prototype.showSettings;
 	vgapDashboard.prototype.showSettings = function () {
 
 		oldShowSettings.apply(this,arguments);
 
+		var b = "";
 		
-		var b = "<br><h3>Color Settings</h3>";
-		
-		b += "<div id=playerColors'><table>";
+		b += "<div id=playerColors'>";
+		b += "<br><h3>Color Settings</h3><table>";
 
-		for (var i=1; i<=vgap.game.slots;++i) {
+		for (var i=1; i<=vgap.game.slots; ++i) {
 			b += "<tr><td>Player "+i+": "+vgap.races[i].shortname+"</td>";
-			b +=   "<td><input id='color.S"+i+"' type='color' onchange='vgap.dash.changingColors(S"+i+")' value=" + localStorage["colors.S"+i] + " /></td>";
-			b +=   "<td><input id='color.E"+i+"' type='color' onchange='vgap.dash.changingColors(E"+i+")' value=" + localStorage["colors.E"+i] + " /></td></tr>";
+			b +=   "<td><input id='color.S"+i+"' type='color' onchange='vgap.dash.setPlayerColors("+i+")' value=" + localStorage["colors.S"+i] + " /></td>";
+			b +=   "<td><input id='color.E"+i+"' type='color' onchange='vgap.dash.setPlayerColors("+i+")' value=" + localStorage["colors.E"+i] + " /></td>";
+			b +=   "<td><div id='showExample.S"+i+"' /></td></tr>";
 		}
+		
+		// rotate colors on selection, set player n to blue and redistribute color wheel
 		
 		b += "</table></div>";
 		
 		$("#AccountSettings").replaceWith(b);
+		
+		this.showPlayerColors();
 	};
 
+	vgapDashboard.prototype.setPlayerColors = function(player) {
+		localStorage[player] = $("#playerColors :contains("+player+")").val();
+		this.showPlayerColors();
+	};
 
-	vgapDashboard.prototype.changingColors = function(player) {
-        if (this.notePaper == undefined) {
-	        this.notePaper = Raphael("noteCanvas", 160, 80);
-	        this.noteCanvas = this.notePaper.set();
-        }
-        
-        if (this.notePaper) {
-		    var s = $("#notesOptions #noteColorStart").val();
-		    var e = $("#notesOptions #noteColorEnd").val();
-	        var r = {fill:"r"+s+"-"+e, "fill-opacity":1};
+	vgapDashboard.prototype.showPlayerColors = function() {
+		
+		for (var i=1; i<=vgap.game.slots; ++i) {
+			if (vgap.dash.paper == undefined)
+				vgap.dash.paper = [];
+			
+			if (vgap.dash.paper["colors.S"+i] == undefined)
+				vgap.dash.paper["colors.S"+i] = Raphael(document.getElementById("showExample.S"+i), 70, 30);
+			
+			var paper = vgap.dash.paper["colors.S"+i];
+			var canvas = paper.set();
+			
+		    var s = localStorage["colors.S"+i];
+		    var e = localStorage["colors.E"+i];
 	        var l = {fill:"0-"+s+"-"+e, "fill-opacity":1};
 		    
-		    this.noteCanvas.clear();
-	        this.noteCanvas.push(this.notePaper.circle(40, 40, 40).attr(r));
-	        this.noteCanvas.push(this.notePaper.circle(120, 40, 40).attr(l));
-        }
+		    canvas.clear();
+	        canvas.push(paper.circle(15, 15, 8).attr(l));
+	        
+	    	d = {"stroke":s, "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-opacity":1};
+	        canvas.push(paper.path("M 30 15 L 65 15 Z").attr(d));
+		}
 	};
 
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-    	$("#notesOptions :checkbox").each(function(a) {
-			localStorage[$(this).attr("id")] = $(this).is(":checked");
-    	});
-
 //     	:color doesn't work yet
 //		$("#notesOptions :color").each(function(b) {
 //			localStorage[$(this).attr("id")] = $(this).val();
 //		});
 	    	
-	    localStorage.noteColor = $("#notesOptions #noteColor").val();
-
+		for (var i=1; i<=vgap.game.slots; ++i) {
+			localStorage["colors.S"+i] = $("#playerColors :contains('colors.S"+i+"')").val();
+			localStorage["colors.E"+i] = $("#playerColors :contains('colors.E"+i+"')").val();
+		}
+		
 	    oldSaveSettings.apply(this,arguments);
 	};
-	
-	var oldLoadControls = vgapMap.prototype.loadControls; 
-	vgapMap.prototype.loadControls = function () {
-
-		oldLoadControls.apply(this, arguments);
 		
-    	if (localStorage.hideMapTip == "true" && vgap.map.mapTip != null)
-    		vgap.map.mapTip.hide();
-    	else
-    		vgap.map.mapTip = $("<div id='MapTip'></div>").appendTo("#PlanetsContainer").hide();	// not defined before calling loadControls
-	};
-		
-	vgapMap.prototype.drawNotes = function() {		// make the box red instead of yellow
-		if (this.notes == undefined)
-			this.notes = this.paper.set();
-        this.notes.clear();
-	    
-	    if (localStorage.noteDisplay == "true") {
-		    for (var c = 0; c < vgap.notes.length; c++) {
-		        var d = vgap.notes[c];
-		        if (d.targettype == 1 && d.body.length > 0) {
-		            var e = vgap.getPlanet(d.targetid);
-		            var b = 7;
-		            var g = vgap.map.screenX(e.x) - (b * this.zoom);
-		            var h = vgap.map.screenY(e.y) - (b * this.zoom);
-		            var f = (b + b) * this.zoom;
-		            var a = {stroke: localStorage.noteColor, "stroke-width": "1","stroke-opacity": 0.5};
-		            vgap.map.notes.push(vgap.map.paper.rect(g, h, f, f).attr(a));
-		        }
-		    }
-	    }
-    };
-	
 }
 
 var script = document.createElement("script");
