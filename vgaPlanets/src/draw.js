@@ -123,8 +123,8 @@ function wrapper () { // wrapper for injection
                 var y = this.screenY(N.y);
                 var G = N.radius * this.zoom;
                 
-                var s  = "hsl("+(N.gas/5*239)+",240,75)";
-                var e  = "hsl("+(N.gas/5*239)+",240,16)";
+                var s  = "hsl("+(N.gas/5)+",.5,.2)";
+                var e  = "hsl("+(N.gas/5)+",.3,.005)";
                  
                 var c = {fill:"r"+s+"-"+e, "fill-opacity":0.01, "stroke-opacity":0};
                 this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
@@ -152,7 +152,7 @@ function wrapper () { // wrapper for injection
 
                 var a = {fill:"r "+start+"-black", "fill-opacity":.01, "stroke-opacity":0};
                 this.planets.push(vgap.map.paper.circle(x, y, k).attr(a));
-
+                
                 a = {fill:"white", "fill-opacity":.04, "stroke-opacity":0};
                 this.planets.push(vgap.map.paper.circle(x, y, G).attr(a));
                 a = {fill:"white", "fill-opacity":.2, "stroke-opacity":0};
@@ -162,15 +162,17 @@ function wrapper () { // wrapper for injection
 
         for (var i = 0; i < vgap.planets.length; ++i) {                            
         	var planet = vgap.planets[i];
-            var x = this.screenX(planet.x);
-            var y = this.screenY(planet.y);
             
             if (planet.debrisdisk > 1) {
-            	G = planet.debrisdisk * this.zoom;
             	if (planet.debrisdisk > 1) {
+            		var G = planet.debrisdisk * this.zoom;
                     var s  = "#462300";
                     var e  = "#2b1500";
-            		c = {fill:"r "+s+"-"+e, "fill-opacity":.01, "stroke-opacity":0};
+                    
+		            var x = this.screenX(planet.x);
+		            var y = this.screenY(planet.y);
+            		var c = {fill:"r "+s+"-"+e, "fill-opacity":.01, "stroke-opacity":0};
+            		
             		this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
             	}
             }
@@ -178,17 +180,17 @@ function wrapper () { // wrapper for injection
         
         for (var i = 0; i < vgap.planets.length; ++i) {                            
         	var planet = vgap.planets[i];
-            var x = this.screenX(planet.x);
-            var y = this.screenY(planet.y);
-            
             var G = Math.min(24, Math.max(6 * this.zoom, 3));
-            var c = {fill:"0-"+localStorage["colors.S"+planet.ownerid]+"-"+localStorage["colors.E"+planet.ownerid], "fill-opacity":1};
             
             if (planet.debrisdisk > 1) 
             	continue;
             if (planet.debrisdisk == 1) 
                 G = Math.min(8, Math.max(2 * this.zoom, 1.5));
 
+            var x = this.screenX(planet.x);
+            var y = this.screenY(planet.y);
+            var c = {fill:"0-"+localStorage["colors.S"+planet.ownerid]+"-"+localStorage["colors.E"+planet.ownerid], "fill-opacity":1};
+            
             this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
         }
     };
