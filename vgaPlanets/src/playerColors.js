@@ -1,52 +1,59 @@
 // ==UserScript==
-// @name          Planets.nu hide notes display on map
-// @description   hide notes box drawn around planets.
+// @name          Planets.nu set player colors
+// @description   set player colors on option screen. shows sample planet gradient and sample waypoint.
 // @include       http://planets.nu/home
 // @include       http://planets.nu/games/*
-// @homepage      http://planets.nu/discussion/utility-script-hide-notes-display
-// @version 1.11
+// @homepage      http://planets.nu/discussion/
+// @version 1.00
 // ==/UserScript==
 
 function wrapper () {
-	
-	var oldProcessLoad = vgaPlanets.prototype.processLoad;
-    vgaPlanets.prototype.processLoad = function(f) {
-    	
-    	oldProcessLoad.apply(this,arguments);
-    	
-   };
 	
 	var oldShowSettings = vgapDashboard.prototype.showSettings;
 	vgapDashboard.prototype.showSettings = function () {
 
 		oldShowSettings.apply(this,arguments);
+		
+		this.buildPlayerColors();
+		this.showPlayerColors();
+	};
 
+	vgapDashboard.prototype.buildPlayerColors = function() {
 		var b = "";
 		
-		b += "<div id=playerColors'>";
+		b += "<div id=AccountSettings'>";
 		b += "<br><h3>Color Settings</h3><table>";
 
 		for (var i=1; i<=vgap.game.slots; ++i) {
 			b += "<tr><td>Player "+i+": "+vgap.races[i].shortname+"</td>";
-			b +=   "<td><input id='color.S"+i+"' type='color' onchange='vgap.dash.setPlayerColors("+i+")' value=" + localStorage["colors.S"+i] + " /></td>";
-			b +=   "<td><input id='color.E"+i+"' type='color' onchange='vgap.dash.setPlayerColors("+i+")' value=" + localStorage["colors.E"+i] + " /></td>";
+			b +=   "<td><input id='colors.S"+i+"' type='color' onchange='vgap.dash.setPlayerColors()' value=" + localStorage["colors.S"+i] + " /></td>";
+			b +=   "<td><input id='colors.E"+i+"' type='color' onchange='vgap.dash.setPlayerColors()' value=" + localStorage["colors.E"+i] + " /></td>";
 			b +=   "<td><div id='showExample.S"+i+"' /></td></tr>";
 		}
 		
-		// rotate colors on selection, set player n to blue and redistribute color wheel
-		
-		b += "</table></div>";
+		b += "<tr><td colspan=2><button type='button' onmousedown='vgap.dash.resetPlayerColors()'>Reset Player Colors</button></td></tr></table></div>";
 		
 		$("#AccountSettings").replaceWith(b);
+	};
+	
+	vgapDashboard.prototype.setPlayerColors = function() {
+		$("#AccountSettings,input[type='color']").each(function(b) {
+			localStorage[$(this).attr("id")] = $(this).val();
+		});
+
+		this.showPlayerColors();
+	};
+
+	vgapDashboard.prototype.resetPlayerColors = function() {
+		vgap.map.setColors();
 		
-		this.showPlayerColors();
+		$("#AccountSettings,input[type='color']").each(function(b) {
+			$(this).val(localStorage[$(this).attr("id")]);
+		});
+		
+		vgap.dash.showPlayerColors();
 	};
-
-	vgapDashboard.prototype.setPlayerColors = function(player) {
-		localStorage[player] = $("#playerColors :contains("+player+")").val();
-		this.showPlayerColors();
-	};
-
+	
 	vgapDashboard.prototype.showPlayerColors = function() {
 		
 		for (var i=1; i<=vgap.game.slots; ++i) {
@@ -54,39 +61,26 @@ function wrapper () {
 				vgap.dash.paper = [];
 			
 			if (vgap.dash.paper["colors.S"+i] == undefined)
-				vgap.dash.paper["colors.S"+i] = Raphael(document.getElementById("showExample.S"+i), 70, 30);
+				vgap.dash.paper["colors.S"+i] = Raphael(document.getElementById("showExample.S"+i), 90, 30);
 			
 			var paper = vgap.dash.paper["colors.S"+i];
 			var canvas = paper.set();
+		    canvas.clear();
 			
 		    var s = localStorage["colors.S"+i];
 		    var e = localStorage["colors.E"+i];
-	        var l = {fill:"0-"+s+"-"+e, "fill-opacity":1};
-		    
-		    canvas.clear();
-	        canvas.push(paper.circle(15, 15, 8).attr(l));
+	        var a = {fill:"0-"+s+"-"+e, "fill-opacity":1};
+	        canvas.push(paper.circle(15, 15, 8).attr(a));
 	        
-	    	d = {"stroke":s, "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-opacity":1};
-	        canvas.push(paper.path("M 30 15 L 65 15 Z").attr(d));
+            a = {stroke:s, "stroke-width":1, "stroke-opacity":0.5, fill:s, "fill-opacity":0.2};
+            canvas.push(paper.circle(35, 15, 8).attr(a));
+	        
+	        
+	    	a = {stroke:s, "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-opacity":1};
+	        canvas.push(paper.path("M 50 15 L 85 15 Z").attr(a));
 		}
 	};
 
-	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
-	vgapDashboard.prototype.saveSettings = function() {
-		
-//     	:color doesn't work yet
-//		$("#notesOptions :color").each(function(b) {
-//			localStorage[$(this).attr("id")] = $(this).val();
-//		});
-	    	
-		for (var i=1; i<=vgap.game.slots; ++i) {
-			localStorage["colors.S"+i] = $("#playerColors :contains('colors.S"+i+"')").val();
-			localStorage["colors.E"+i] = $("#playerColors :contains('colors.E"+i+"')").val();
-		}
-		
-	    oldSaveSettings.apply(this,arguments);
-	};
-		
 }
 
 var script = document.createElement("script");
@@ -94,3 +88,4 @@ script.type = "application/javascript";
 script.textContent = "(" + wrapper + ")();";
 
 document.body.appendChild(script);
+

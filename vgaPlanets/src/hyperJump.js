@@ -15,14 +15,12 @@ function wrapper () {
     	oldProcessLoad.apply(this,arguments);
     	
     	if(typeof(Storage)!=="undefined") {
-	    	if (localStorage.hyperjumpRing == null)
+	    	if (localStorage.hyperjumpRing == null) {
 	    		localStorage.hyperjumpRing = "true";
-	    	if (localStorage.hyperjumpPlanets == null)
 	    		localStorage.hyperjumpPlanets = "true";
-	    	if (localStorage.planetColor == null)
 	    		localStorage.planetColor = "#80ffff";
-	    	if (localStorage.ringColor == null)
 	    		localStorage.ringColor = "#80ffff";
+	    	}
     	}
     };
 	
@@ -48,17 +46,13 @@ function wrapper () {
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-	    $("#hyperjumpOptions input").each(function(a) {
+	    $("#hyperjumpOptions,:checkbox").each(function(a) {
 	        localStorage[$(this).attr("id")] = $(this).is(":checked");
 	    });
 	    
-//	 	:color doesn't work yet
-//	    $("#hyperjumpOptions :color").each(function(a) {
-//	        localStorage[$(this).attr("id")] = $(this).val();
-//	    });
-	    
-	    localStorage.planetColor = $("#hyperjumpOptions #planetColor").val();
-	    localStorage.ringColor = $("#hyperjumpOptions #ringColor").val();
+		$("#hyperjumpOptions,input[type='color']").each(function(b) {
+			localStorage[$(this).attr("id")] = $(this).val();
+		});
 	    
 		oldSaveSettings.apply(this,arguments);
 	};
