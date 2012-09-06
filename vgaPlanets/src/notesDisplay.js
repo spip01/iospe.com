@@ -7,7 +7,7 @@
 // @version 1.11
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () {	// notesDisplay.js
 	
 	var oldProcessLoad = vgaPlanets.prototype.processLoad;
     vgaPlanets.prototype.processLoad = function(f) {

@@ -7,7 +7,7 @@
 // @version 1.00
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () {	// playerColors.js
 	
 	var oldShowSettings = vgapDashboard.prototype.showSettings;
 	vgapDashboard.prototype.showSettings = function () {

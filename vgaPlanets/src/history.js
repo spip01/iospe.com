@@ -8,7 +8,7 @@
 // @version 1.0
 // ==/UserScript==
 
-function wrapper () { // wrapper for injection
+function wrapper () { // history.js
 
 	var oldLoadControls = vgapMap.prototype.loadControls; 
 	vgapMap.prototype.loadControls = function () {

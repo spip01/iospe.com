@@ -7,7 +7,7 @@
 // @version 1.10
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () {	// hyperJump.js
 	
 	var oldProcessLoad = vgaPlanets.prototype.processLoad;
     vgaPlanets.prototype.processLoad = function(f) {
@@ -18,7 +18,6 @@ function wrapper () {
 	    	if (localStorage.hyperjumpRing == null) {
 	    		localStorage.hyperjumpRing = "true";
 	    		localStorage.hyperjumpPlanets = "true";
-	    		localStorage.planetColor = "#80ffff";
 	    		localStorage.ringColor = "#80ffff";
 	    	}
     	}
@@ -32,8 +31,7 @@ function wrapper () {
 		var b = "<br><h3>HyperJump Circles</h3>";
 		
 		b += "<div id='hyperjumpOptions'><table>";
-		b += "<tr><td><input id='hyperjumpPlanets' type='checkbox'" + (localStorage.hyperjumpPlanets == "true" ? "checked='true'" : "") + "/></td><td>Mark planets in jump range</td>";
-		b += "<td><input id='planetColor' type='color' value=" + localStorage.planetColor + " /></td><td>Marked planet color</td></tr>";
+		b += "<tr><td><input id='hyperjumpPlanets' type='checkbox'" + (localStorage.hyperjumpPlanets == "true" ? "checked='true'" : "") + "/></td><td>Mark planets in jump range</tr>";
 		b += "<tr><td><input id='hyperjumpRing' type='checkbox'" + (localStorage.hyperjumpRing == "true" ? "checked='true'" : "") + "/></td><td>Draw double ring at jump radius</td>";
 		b += "<td><input id='ringColor' type='color' value=" + localStorage.ringColor + " /></td><td>Ring color</td></tr>";
 		b += "</table></div>";
@@ -64,7 +62,7 @@ function wrapper () {
 				var planet = vgap.planets[i];
 				var dist = vgap.map.getDist(x, y, planet.x, planet.y);
 				if (dist >= 340 && dist <= 360)
-					this.drawCircle(planet.x, planet.y, 12 * this.zoom, { stroke: localStorage.planetColor, "stroke-width": 2, "stroke-opacity": .5 });	// I wanted the target planets circled
+					this.drawCircle(planet.x, planet.y, 12 * this.zoom, { stroke: localStorage.ringColor, "stroke-width": 2, "stroke-opacity": .5 });	// I wanted the target planets circled
 				else if (dist >= 338 && dist <= 362)
 					this.drawCircle(planet.x, planet.y, 12 * this.zoom, { stroke: "yellow", "stroke-width": 2, "stroke-opacity": .5 });	// I wanted the target planets circled
 			}

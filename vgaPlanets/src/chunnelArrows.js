@@ -7,7 +7,7 @@
 // @version 1.12
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () { // chunnelArrows.js
 	var zoomTable = [25, 50, 75, 100, 125, 150, 175, 200, 300, 400, 500, 1000, 2000, 4000 ];
 	
 	var oldLoadControls = vgapMap.prototype.loadControls; 
@@ -49,13 +49,10 @@ function wrapper () {
 	    		localStorage.waypointChunnel = "true";
 	    		localStorage.waypointHYP = "true";
 	    		localStorage.filterZoom = "true";
-	    		localStorage.chunnelColor = "#8080ff";
-	    		localStorage.hypColor = "#800040";
 	    		localStorage.startZoom = "1";
 	    		localStorage.startX = "2000";
 	    		localStorage.startY = "2000";
 	    		localStorage.shipHistoryLength = "3";
-	    		localStorage.shipHistoryColor = "#000080";
 	    		localStorage.warpCircle = "true";
 	    	}
     	}
@@ -72,16 +69,13 @@ function wrapper () {
 		b += "<tr><td><input id='warpCircle' type='checkbox'" + (localStorage.warpCircle == "true" ? "checked='true'" : "") + "/>";
 		b += 	 " Draw warp circle at ships location</td>";
 		b +=	 "<td>&nbsp;&nbsp;<input id='shipHistoryLength' type='range' vs='vs' value=" + localStorage.shipHistoryLength + " min=0 max=99 onchange='vgap.dash.updateShipHistory()'/>";
-		b +=     "<div id='shipHistory'>&nbsp;&nbsp;&nbsp;" + localStorage.shipHistoryLength + " Ship History Depth</div></td>";
-		b +=     "<td><input id='shipHistoryColor' type='color' vs='vs' value=" + localStorage.shipHistoryColor + " /> Ship history color</td></tr>";
+		b +=     "<div id='shipHistory'>&nbsp;&nbsp;&nbsp;" + localStorage.shipHistoryLength + " Ship History Depth</div></td></tr>";
 		
 		b += "<tr><td colspan=2><input id='waypointChunnel' type='checkbox'" + (localStorage.waypointChunnel == "true" ? "checked='true'" : "") + "/>";
-		b += 	 " Draw direction arrows at destination of chunneling ships</td>";
-		b +=     "<td><input id='chunnelColor' type='color' vs='vs' value=" + localStorage.chunnelColor + " /> Chunnel color</td></tr>";
+		b += 	 " Draw direction arrows at destination of chunneling ships</td></tr>";
 		
 		b += "<tr><td colspan=2><input id='waypointHYP' type='checkbox'" + (localStorage.waypointHYP == "true" ? "checked='true'" : "") + "/>";
-		b += 	 " Draw direction arrows at destination of HYP ships</td>";
-		b +=     "<td><input id='hypColor' type='color' vs='vs' value=" + localStorage.hypColor + " /> HYP color</td></tr>";
+		b += 	 " Draw direction arrows at destination of HYP ships</td></tr>";
 		
 		b += "<tr><td colspan=3><input id='filterZoom' type='checkbox'" + (localStorage.filterZoom == "true" ? "checked='true'" : "") + "/>";
 		b += 	" Zoom to destination of selected ship when zoomed to the max and only show selected ship</td></tr>";
@@ -140,53 +134,29 @@ function wrapper () {
 		vgap.map.updateZoom();
 	};
 	
+	var oldDrawWaypoints = vgapMap.prototype.drawWaypoints;
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-		if (this.waypoints == undefined)
-			this.waypoints = this.paper.set();
-        this.waypoints.clear();
-		var d;
-			
         if (localStorage.filterZoom == "true" && this.zoom == 40 && (ship = vgap.map.activeShip) != null) {
+			if (this.waypoints == undefined)
+				this.waypoints = this.paper.set();
+	        this.waypoints.clear();
+	        
+	        var d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
+				
 			var dist = vgap.map.getDist(ship.targetx, ship.targety, this.centerX, this.centerY);
 			if (dist > 10)
 				this.centerMap(ship.targetx, ship.targety);
 			
-	        d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-opacity": 0.5};
+	        d["arrow-end"] = "classic-wide-long";
             if (vgap.isHyping(ship))
-            	d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
+            	d["stroke-dasharray"] = ".";
+            
             this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
-            return;
 		}
-		
-		for (var i=0; i<vgap.ships.length; ++i) {
-			var ship = vgap.ships[i];
-			if (vgap.isChunnelling(ship)) {
-            	var m = Number(ship.friendlycode);
-                var to = vgap.getShip(m);
-                	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "stroke-dasharray":"-", "stroke-opacity":0.5};
-	                if (localStorage.waypointChunnel == "true")
-	                	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "arrow-end":"classic-wide-long", "stroke-dasharray":"-", "stroke-opacity":0.5};
-                this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
-            	   
-            }
-			else if (vgap.isHyping(ship)) {
-            	d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width":2, "stroke-dasharray":".", "stroke-opacity":0.5};
-                if (localStorage.waypointHYP == "true")
-                	d = {"stroke": vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "arrow-end":"classic-wide-long", "stroke-dasharray": ".", "stroke-opacity": 0.5};
-	            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
-            }
-			else {
-	            var k = vgap.getSpeed(ship.warp, ship.hullid);
-	            if (k && ship.heading != -1) {
-		            var n = ship.x + Math.round(Math.sin(Math.toRad(ship.heading)) * k);
-		            var o = ship.y + Math.round(Math.cos(Math.toRad(ship.heading)) * k);
-	                d = {"stroke":vgap.map.colorsA2[ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
-		            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(n) + " " + this.screenY(o)).attr(d));
-				}
-			}
-        }
-	};
+        else 
+        	oldDrawWaypoints();
+    };
 	
 	var oldSelectShip = vgapMap.prototype.selectShip;
 	vgapMap.prototype.selectShip = function(a) {
@@ -201,7 +171,7 @@ function wrapper () {
 		this.special.clear();
 		
 		var ship = vgap.getShip(a);
-		var at = { stroke: localStorage.shipHistoryColor, "stroke-width": 2, "stroke-opacity": .5 };
+		var d = { stroke:localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-opacity":.25 };
 
 		var tox; //= ship.targetx;
 		var toy; //= ship.targety;
@@ -209,7 +179,7 @@ function wrapper () {
 		var fromy = ship.y;
 
 		if (localStorage.warpCircle)
-			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(at));
+			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(d));
 		
 		for (var j = 0; j < localStorage.shipHistoryLength && j < ship.history.length; j++) {
 
@@ -218,7 +188,7 @@ function wrapper () {
 			fromx = ship.history[j].x;
 			fromy = ship.history[j].y;
 			
-			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(at));
+			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(d));
 		}
 	};    
 

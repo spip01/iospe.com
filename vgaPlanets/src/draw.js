@@ -1,4 +1,14 @@
-function wrapper () { // wrapper for injection
+// ==UserScript==
+// @name          Planets.nu map draw
+// @description   new map drawing routines.  library for other modules
+// @include       http://planets.nu/home
+// @include       http://planets.nu/games/*
+// @include       http://play.planets.nu/*
+// @homepage      http://planets.nu/discussion/
+// @version 1.0
+// ==/UserScript==
+
+function wrapper () { // draw.js
 
 	var oldLoadControls = vgapMap.prototype.loadControls; 
 	vgapMap.prototype.loadControls = function () {
@@ -30,21 +40,28 @@ function wrapper () { // wrapper for injection
 			var rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
 			
 			localStorage["colors.S" + i] = rgb;
-			
-			r *= .6;
-			g *= .6;
-			b *= .6;
-			
-			rs = "0" + Number(r.toFixed(0)).toString(16);
-			gs = "0" + Number(g.toFixed(0)).toString(16);
-			bs = "0" + Number(b.toFixed(0)).toString(16);
-			
-			rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
-			
-			localStorage["colors.E" + i] = rgb;
+			localStorage["colors.E" + i] = this.dim(rgb, .6);
 		}
 	};
-    	    
+    
+	
+	vgapMap.prototype.dim = function(rgb, dim) {
+		var r = parseInt(rgb.slice(1,3), 16);
+		var g = parseInt(rgb.slice(3,5), 16);
+		var b = parseInt(rgb.slice(5,7), 16);
+		
+		r *= dim;
+		g *= dim;
+		b *= dim;
+		
+		var rs = "0" + Number(r.toFixed(0)).toString(16);
+		var gs = "0" + Number(g.toFixed(0)).toString(16);
+		var bs = "0" + Number(b.toFixed(0)).toString(16);
+		
+		return "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
+
+	}
+	
 	vgapMap.prototype.draw = function() {
 	    this.paper.safari();
 	    vgap.connectionsActivated = 0;
@@ -248,32 +265,37 @@ function wrapper () { // wrapper for injection
 		if (this.waypoints == undefined)
 			this.waypoints = this.paper.set();
         this.waypoints.clear();
-		var d;
+        
+		var d = {"stroke-width":2, "stroke-opacity":0.5};
 		
 		for (var i=0; i<vgap.ships.length; ++i) {
 			var ship = vgap.ships[i];
+			var x = this.screenX(ship.x);
+			var y = this.screenY(ship.y);
+			d.stroke = localStorage["colors.S"+ship.ownerid];
+			
 			if (ship.ownerid == vgap.player.id) {
 				if (vgap.isChunnelling(ship)) {
 	            	var m = Number(ship.friendlycode);
 	                var to = vgap.getShip(m);
-                	d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-dasharray":"-", "stroke-opacity":0.5};
-	                this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
+                	d["stroke-dasharray"] = "-";
+	                this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
 				}
 				else {
 					if (vgap.isHyping(ship)) 
-						d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-dasharray":".", "stroke-opacity":0.5};
-					else
-						d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-opacity":0.5};
-	            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
+	                	d["stroke-dasharray"] = ".";
+					this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
 				}
+				
+            	d["stroke-dasharray"] = undefined;
 			}
 			else {
 	            var k = vgap.getSpeed(ship.warp, ship.hullid);
+	            
 	            if (k && ship.heading != -1) {
 		            var n = ship.x + Math.round(Math.sin(Math.toRad(ship.heading)) * k);
 		            var o = ship.y + Math.round(Math.cos(Math.toRad(ship.heading)) * k);
-	                d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
-		            this.waypoints.push(this.paper.path("M" + this.screenX(ship.x) + " " + this.screenY(ship.y) + "L" + this.screenX(n) + " " + this.screenY(o)).attr(d));
+		            this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(n) + " " + this.screenY(o)).attr(d));
 				}
 			}
         }
