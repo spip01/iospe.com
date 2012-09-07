@@ -59,8 +59,11 @@ function wrapper () { // draw.js
 		var bs = "0" + Number(b.toFixed(0)).toString(16);
 		
 		return "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
-
-	}
+	};
+	
+	vgapMap.prototype.getColors = function (player) {
+		return {start:localStorage["colors.S"+player], end:localStorage["colors.E"+player]};
+	};
 	
 	vgapMap.prototype.draw = function() {
 	    this.paper.safari();
@@ -206,7 +209,8 @@ function wrapper () { // draw.js
 
             var x = this.screenX(planet.x);
             var y = this.screenY(planet.y);
-            var c = {fill:"0-"+localStorage["colors.S"+planet.ownerid]+"-"+localStorage["colors.E"+planet.ownerid], "fill-opacity":1};
+            var color = this.getColors(planet.ownerid);
+            var c = {fill:"0-"+color.start+"-"+color.end, "fill-opacity":1};
             
             this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
         }
@@ -253,9 +257,9 @@ function wrapper () { // draw.js
     		
 			for (var k=0; k<l.length; ++k) {
 			    var s = l[k];
-    			c = {fill:localStorage["colors.S"+s.ownerid]};
-    			var el = vgap.map.paper.rect(x, y, G, G).attr(c);
-    			this.ships.push(el.transform("r"+k*45+t));
+			    var c = this.getColors(s.ownerid);
+    			var r = vgap.map.paper.rect(x, y, G, G).attr({fill:c.start});
+    			this.ships.push(r.transform("r"+k*45+t));
 			}
     	}
     };
@@ -272,7 +276,8 @@ function wrapper () { // draw.js
 			var ship = vgap.ships[i];
 			var x = this.screenX(ship.x);
 			var y = this.screenY(ship.y);
-			d.stroke = localStorage["colors.S"+ship.ownerid];
+		    var c = this.getColors(ship.ownerid);
+			d.stroke = c.start;
 			
 			if (ship.ownerid == vgap.player.id) {
 				if (vgap.isChunnelling(ship)) {
@@ -328,24 +333,24 @@ function wrapper () { // draw.js
     	if (this.ionstorms == undefined)
     		this.ionstorms = this.paper.set();
     	this.ionstorms.clear();
-        
+    	
         for (var b = 0; b < vgap.ionstorms.length; b++) {
             var d = vgap.ionstorms[b];
             
-            var c = 0.5;
-            if (d.voltage >= 50) 
-                c = 0.075;
-            if (d.voltage >= 100) 
-                c = 0.1;
-            if (d.voltage >= 150) 
-                c = 0.15;
-            if (d.voltage >= 200) 
-                c = 0.2;
-
+            var c = 0.01;
             var s  = "#707000";
             var e  = "#202000";
              
-            var a = {fill:"r"+s+"-"+e, "fill-opacity":c/10, "stroke-opacity":0};
+            if (d.voltage >= 50) 
+                c = 0.05;
+            if (d.voltage >= 100) 
+                c = 0.1;
+            if (d.voltage >= 150)
+                c = 0.15;
+            if (d.voltage >= 200) 
+                c = 0.2;
+            
+            var a = {fill:"r"+s+"-"+e, "fill-opacity":c, "stroke-opacity":0};
 
             this.ionstorms.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
         }
@@ -355,7 +360,7 @@ function wrapper () { // draw.js
             
             var e = d.x + Math.round(Math.sin(Math.toRad(d.heading)) * d.warp * d.warp);
             var f = d.y + Math.round(Math.cos(Math.toRad(d.heading)) * d.warp * d.warp);
-            this.ionstorms.push(this.paper.path("M" + this.screenX(d.x) + " " + this.screenY(d.y) + "L" + this.screenX(e) + " " + this.screenY(f)).attr({stroke: "yellow","stroke-width": 1,"stroke-opacity": .25}));
+            this.ionstorms.push(this.paper.path("M" + this.screenX(d.x) + " " + this.screenY(d.y) + "L" + this.screenX(e) + " " + this.screenY(f)).attr({stroke:s, "stroke-width":1, "stroke-opacity":.5}));
 	    }
     };
     
@@ -366,8 +371,8 @@ function wrapper () { // draw.js
 
     	for (var c = 0; c < vgap.minefields.length; c++) {
             var d = vgap.minefields[c];
-            var b = localStorage["colors.S"+d.ownerid];
-            var a = {stroke: b,"stroke-width": "1","stroke-opacity": 0.5,fill: b,"fill-opacity": 0.2};
+		    var c = this.getColors(d.ownerid);
+            var a = {stroke:c.start, "stroke-width":1, "stroke-opacity":0.5, fill:c.start, "fill-opacity":0.2};
             this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
         }
     };

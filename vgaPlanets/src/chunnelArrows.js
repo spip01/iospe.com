@@ -141,8 +141,9 @@ function wrapper () { // chunnelArrows.js
 			if (this.waypoints == undefined)
 				this.waypoints = this.paper.set();
 	        this.waypoints.clear();
-	        
-	        var d = {"stroke":localStorage["colors.S"+ship.ownerid], "stroke-width": 2, "stroke-opacity": 0.5};
+		    var c = this.getColors(ship.ownerid);
+
+	        var d = {"stroke":c.start, "stroke-width": 2, "stroke-opacity": 0.5};
 				
 			var dist = vgap.map.getDist(ship.targetx, ship.targety, this.centerX, this.centerY);
 			if (dist > 10)
@@ -171,7 +172,9 @@ function wrapper () { // chunnelArrows.js
 		this.special.clear();
 		
 		var ship = vgap.getShip(a);
-		var d = { stroke:localStorage["colors.S"+ship.ownerid], "stroke-width":2, "stroke-opacity":.25 };
+	    var c = this.getColors(ship.ownerid);
+
+		var d = { stroke:c.start, "stroke-width":2, "stroke-opacity":.25 };
 
 		var tox; //= ship.targetx;
 		var toy; //= ship.targety;
