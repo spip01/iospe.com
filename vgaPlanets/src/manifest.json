@@ -6,7 +6,7 @@
    "content_scripts": [ {
       "matches": [ "http://*/*", "https://*/*" ],
       "include_globs": [ "http://planets.nu/home*", "http://planets.nu/games*", "http://play.planets.nu/*" ],
-      "js": [ "chunnelArrows.js", "playerColors.js", "hyperJump.js", "notesDisplay.js", "draw.js" ],
+      "js": [ "hyperJump.js", "notesDisplay.js", "checkReady.js", "checkStarbase.js", "test.js", "draw.js", "playerColors.js" ],
       "run_at": "document_idle"
    } ]
 }

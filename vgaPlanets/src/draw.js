@@ -18,6 +18,8 @@ function wrapper () { // draw.js
     	if(typeof(Storage)!=="undefined") {
 	    	if (localStorage["colors.E0"] == null) {
 	    		this.setColors();
+	    		localStorage.waypointChunnel = "false";
+	    		localStorage.waypointHYP = "false";
 	    	}
     	}
    };
@@ -85,9 +87,10 @@ function wrapper () { // draw.js
 	        	vgap.map.drawIonStorms();
 	        	vgap.map.drawMinefields();
 	        }
-        	vgap.map.drawWaypoints();
-	        vgap.map.drawShips();
+	        
         	vgap.map.drawPlanets();
+	        vgap.map.drawShips();
+        	vgap.map.drawWaypoints();
         	
 	        if (this.zoom < 20) {
 	        	vgap.map.drawExplosions();
@@ -263,7 +266,7 @@ function wrapper () { // draw.js
 			}
     	}
     };
-    
+/*    
 	vgapMap.prototype.drawWaypoints = function()
 	{        
 		if (this.waypoints == undefined)
@@ -284,14 +287,20 @@ function wrapper () { // draw.js
 	            	var m = Number(ship.friendlycode);
 	                var to = vgap.getShip(m);
                 	d["stroke-dasharray"] = "-";
+                	if (localStorage.waypointChunnel== true)
+                		d["arrow-end"] = "classic-wide-long";
 	                this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
 				}
 				else {
-					if (vgap.isHyping(ship)) 
+					if (vgap.isHyping(ship)) {
 	                	d["stroke-dasharray"] = ".";
+	                	if (localStorage.waypointHYP== true)
+	                		d["arrow-end"] = "classic-wide-long";
+					}
 					this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
 				}
 				
+            	d["arrow-end"] = undefined;
             	d["stroke-dasharray"] = undefined;
 			}
 			else {
@@ -305,7 +314,7 @@ function wrapper () { // draw.js
 			}
         }
 	};
-
+*/
 	vgapMap.prototype.drawExplosions = function() {
     	if (this.explosions == undefined)
     		this.explosions = this.paper.set();
