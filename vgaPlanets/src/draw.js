@@ -10,63 +10,6 @@
 
 function wrapper () { // draw.js
 
-	var oldLoadControls = vgapMap.prototype.loadControls; 
-	vgapMap.prototype.loadControls = function () {
-
-		oldLoadControls.apply(this, arguments);
-		
-    	if(typeof(Storage)!=="undefined") {
-	    	if (localStorage["colors.E0"] == null) {
-	    		this.setColors();
-	    		localStorage.waypointChunnel = "false";
-	    		localStorage.waypointHYP = "false";
-	    	}
-    	}
-   };
-	
-	vgapMap.prototype.setColors = function () {
-		localStorage["colors.S0"] = "#808080";
-		localStorage["colors.E0"] = "#101010";
-   	
-		for (var i=1; i<=vgap.game.slots; ++i) {
-			var s = i / vgap.game.slots * 2 * Math.PI;
- 			
-			var r = (Math.cos(s) + 1) * 127;
-			var g = (Math.cos(s + 2 * Math.PI / 3) + 1) * 127;
-			var b = (Math.cos(s + 4 * Math.PI / 3) + 1) * 127;
-			
-			var rs = "0" + Number(r.toFixed(0)).toString(16);
-			var gs = "0" + Number(g.toFixed(0)).toString(16);
-			var bs = "0" + Number(b.toFixed(0)).toString(16);
-			
-			var rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
-			
-			localStorage["colors.S" + i] = rgb;
-			localStorage["colors.E" + i] = this.dim(rgb, .6);
-		}
-	};
-    
-	
-	vgapMap.prototype.dim = function(rgb, dim) {
-		var r = parseInt(rgb.slice(1,3), 16);
-		var g = parseInt(rgb.slice(3,5), 16);
-		var b = parseInt(rgb.slice(5,7), 16);
-		
-		r *= dim;
-		g *= dim;
-		b *= dim;
-		
-		var rs = "0" + Number(r.toFixed(0)).toString(16);
-		var gs = "0" + Number(g.toFixed(0)).toString(16);
-		var bs = "0" + Number(b.toFixed(0)).toString(16);
-		
-		return "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
-	};
-	
-	vgapMap.prototype.getColors = function (player) {
-		return {start:localStorage["colors.S"+player], end:localStorage["colors.E"+player]};
-	};
-	
 	vgapMap.prototype.draw = function() {
 	    this.paper.safari();
 	    vgap.connectionsActivated = 0;
@@ -102,14 +45,14 @@ function wrapper () { // draw.js
     };
     
     vgapMap.prototype.highlight = function() {
-//    	if (this.hlight == undefined)
+//    	if (this.hlight === undefined)
 //    		this.hlight = this.paper.set();
 //   		this.hlight.clear();	
 //        this.hlight.push(this.paper.circle(this.screenX(this.centerX), this.screenY(this.centerY), 20).attr({stroke: "#0099ff","stroke-width": "3","stroke-opacity": "1"}));
     };
     
     vgapMap.prototype.centered = function() {
-//		if (this.hlight == undefined)
+//		if (this.hlight === undefined)
 //			this.hlight = this.paper.set();
 //		this.hlight.clear();	
 	    this.centering = false;
@@ -135,7 +78,7 @@ function wrapper () { // draw.js
     };
     	
     vgapMap.prototype.drawPlanets = function() {
-    	if (this.planets == undefined)
+    	if (this.planets === undefined)
     		this.planets = this.paper.set();
    		this.planets.clear();	
         
@@ -220,7 +163,7 @@ function wrapper () { // draw.js
     };
     
     vgapMap.prototype.drawStarBases = function() {
-    	if (this.starbases == undefined)
+    	if (this.starbases === undefined)
     		this.starbases = this.paper.set();
     	this.starbases.clear();
 
@@ -244,7 +187,7 @@ function wrapper () { // draw.js
 	};
     
     vgapMap.prototype.drawShips = function() {
-    	if (this.ships == undefined)
+    	if (this.ships === undefined)
     		this.ships = this.paper.set();
     	this.ships.clear();
 
@@ -266,10 +209,10 @@ function wrapper () { // draw.js
 			}
     	}
     };
-/*    
+    
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-		if (this.waypoints == undefined)
+		if (this.waypoints === undefined)
 			this.waypoints = this.paper.set();
         this.waypoints.clear();
         
@@ -287,21 +230,16 @@ function wrapper () { // draw.js
 	            	var m = Number(ship.friendlycode);
 	                var to = vgap.getShip(m);
                 	d["stroke-dasharray"] = "-";
-                	if (localStorage.waypointChunnel== true)
-                		d["arrow-end"] = "classic-wide-long";
 	                this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
 				}
 				else {
 					if (vgap.isHyping(ship)) {
 	                	d["stroke-dasharray"] = ".";
-	                	if (localStorage.waypointHYP== true)
-	                		d["arrow-end"] = "classic-wide-long";
 					}
 					this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
 				}
 				
-            	d["arrow-end"] = undefined;
-            	d["stroke-dasharray"] = undefined;
+            	delete d["stroke-dasharray"];
 			}
 			else {
 	            var k = vgap.getSpeed(ship.warp, ship.hullid);
@@ -314,9 +252,9 @@ function wrapper () { // draw.js
 			}
         }
 	};
-*/
+
 	vgapMap.prototype.drawExplosions = function() {
-    	if (this.explosions == undefined)
+    	if (this.explosions === undefined)
     		this.explosions = this.paper.set();
     	this.explosions.clear();
 
@@ -339,7 +277,7 @@ function wrapper () { // draw.js
 	};
         
     vgapMap.prototype.drawIonStorms = function() {
-    	if (this.ionstorms == undefined)
+    	if (this.ionstorms === undefined)
     		this.ionstorms = this.paper.set();
     	this.ionstorms.clear();
     	
@@ -374,7 +312,7 @@ function wrapper () { // draw.js
     };
     
     vgapMap.prototype.drawMinefields = function() {
-    	if (this.minefields == undefined)
+    	if (this.minefields === undefined)
     		this.minefields = this.paper.set();
     	this.minefields.clear();
 
@@ -385,6 +323,37 @@ function wrapper () { // draw.js
             this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
         }
     };
+    
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.waypoints !== undefined)
+			vgap.map.waypoints.clear();
+
+		if (vgap.map.special !== undefined)
+			vgap.map.special.clear();
+
+		if (vgap.map.minefields !== undefined)
+			vgap.map.minefields.clear();
+
+		if (vgap.map.ionstorms !== undefined)
+			vgap.map.ionstorms.clear();
+
+		if (vgap.map.explosions !== undefined)
+			vgap.map.explosions.clear();
+
+		if (vgap.map.ships !== undefined)
+			vgap.map.ships.clear();
+
+		if (vgap.map.starbases !== undefined)
+			vgap.map.starbases.clear();
+
+		if (vgap.map.planets !== undefined)
+			vgap.map.planets.clear();
+
+		if (vgap.map.notes !== undefined)
+			vgap.map.notes.clear();
+
+		vgap.map.draw();
+	};
 
 }
 	

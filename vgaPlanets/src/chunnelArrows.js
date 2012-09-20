@@ -29,16 +29,18 @@ function wrapper () { // chunnelArrows.js
     	vgap.map.centerY = Number(localStorage.startY);
     };
 
-    vgaPlanets.prototype.deselectAll = function() {
-		vgap.map.deselect();
-        vgap.closeLeft();
-
-	    vgap.map.explosions.remove();
-	    vgap.map.explosions = vgap.map.paper.set();
-	    
-		vgap.map.draw();
-	};
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.waypoints !== undefined)
+			vgap.map.waypoints.clear();
+
+		if (vgap.map.special !== undefined)
+			vgap.map.special.clear();
+
+        oldDeselectAll.apply(this, arguments);
+	};
+
 	var oldProcessLoad = vgaPlanets.prototype.processLoad;
     vgaPlanets.prototype.processLoad = function(f) {
     	
@@ -136,10 +138,14 @@ function wrapper () { // chunnelArrows.js
 	
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-			if (this.waypoints == undefined)
-				this.waypoints = this.paper.set();
-	        this.waypoints.clear();
-	        var d = {"stroke-width": 2, "stroke-opacity": 0.5};
+		if (this.waypoints === undefined)
+			this.waypoints = this.paper.set();
+        this.waypoints.clear();
+
+		if (this.special !== undefined)
+			this.special.clear();
+        
+        var d = {"stroke-width": 2, "stroke-opacity": 0.5};
 	        
         if (localStorage.filterZoom == "true" && this.zoom == 40 && (ship = vgap.map.activeShip) != null) {
 		    var c = this.getColors(ship.ownerid);
@@ -182,8 +188,8 @@ function wrapper () { // chunnelArrows.js
 					this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
 				}
 				
-            	d["arrow-end"] = undefined;
-            	d["stroke-dasharray"] = undefined;
+            	delete d["arrow-end"];
+            	delete d["stroke-dasharray"];
 			}
 			else {
 	            var k = vgap.getSpeed(ship.warp, ship.hullid);
@@ -206,14 +212,14 @@ function wrapper () { // chunnelArrows.js
 	};
 	
     vgapMap.prototype.shipHistory = function (a) {
-		if (this.special == undefined)
+		if (this.special === undefined)
 			this.special = this.paper.set();
 		this.special.clear();
 		
 		var ship = vgap.getShip(a);
 	    var c = this.getColors(ship.ownerid);
 
-		var d = { stroke:c.start, "stroke-width":2, "stroke-opacity":.25 };
+		var d = { stroke:c.start, "stroke-width":2, "stroke-opacity":.5 };
 
 		var tox; //= ship.targetx;
 		var toy; //= ship.targety;
@@ -229,6 +235,12 @@ function wrapper () { // chunnelArrows.js
 			toy = fromy;
 			fromx = ship.history[j].x;
 			fromy = ship.history[j].y;
+			
+			var i = vgap.getNebulaIntensity(tox, toy);
+			if (i > 40) {
+				var v = { fill:c.start, "fill-opacity":.25, "stroke-opacity":0 };
+				vgap.map.special.push(vgap.map.paper.circle(this.screenX(tox), this.screenY(toy), 4000 / i * this.zoom).attr(v));
+			}
 			
 			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(d));
 		}

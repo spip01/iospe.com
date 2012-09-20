@@ -24,14 +24,13 @@ function wrapper () { // wrapper for injection
         vgap.map.shipListMenu();
 	};
 	
-    vgaPlanets.prototype.deselectAll = function() {
-		vgap.map.deselect();
-        vgap.closeLeft();
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.ships !== undefined)
+			vgap.map.ships.clear();
 
-	    vgap.map.explosions.remove();
-	    vgap.map.explosions = vgap.map.paper.set();
-	    
-		vgap.map.draw();
+        oldDeselectAll.apply(this, arguments);
 	};
 
 	vgapMap.prototype.showShipList = function () {
@@ -119,6 +118,10 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.showShips = function(id) {
 		var offy = vgap.map.shipListOffset;
 		var colors = ["aqua", "fuchsia", "lime", "red", "yellow", "blue", "green", "purple", "silver", "teal", "maroon", "navy", "gray", "olive", "white"];
+
+		if (this.ships === undefined)
+			this.ships = this.paper.set();
+        this.ships.clear();
     	
     	var hull = vgap.getArray(nudata.hulls, id);
 		var b = "<li onclick='' style=color:"+colors[offy]+" disabled='disabled'>"+hull.name+"</li>";
@@ -133,7 +136,7 @@ function wrapper () { // wrapper for injection
 				if ((ship = ships[j]) != null) {
 					if (ship.hullid == id) {
 						
-						vgap.map.explosions.push(vgap.map.paper.rect(vgap.map.screenX(ship.x + offx * 6), vgap.map.screenY(ship.y + offy * 7), 4, 4).attr({"fill":colors[offy],"opacity":1}));
+						vgap.map.ships.push(vgap.map.paper.rect(vgap.map.screenX(ship.x + offx * 6), vgap.map.screenY(ship.y + offy * 7), 4, 4).attr({"fill":colors[offy],"opacity":1}));
 						++offx;
 					}
 				}

@@ -63,23 +63,18 @@ function wrapper () {
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 
-// 	:color doesn't work yet
-//	    $("#notReadyOptions :color").each(function(a) {
-//	        localStorage[$(this).attr("id")] = $(this).val();
-//	    });
-	    
-	    localStorage.planetNotReady = $("#notReadyOptions #planetNotReady").val();
-	    localStorage.starbaseNotReady = $("#notReadyOptions #starbaseNotReady").val();
-	    localStorage.shipNotReady = $("#notReadyOptions #shipNotReady").val();
-	    localStorage.hypWarning = $("#notReadyOptions #hypWarning").val();
-	    
+		$("#notReadyOptions,input[type='color']").each(function(b) {
+			localStorage[$(this).attr("id")] = $(this).val();
+		});
+
 		oldSaveSettings.apply(this,arguments);
 	};
 
 	vgapMap.prototype.checkReady = function () 
 	{
-//	    vgap.map.explosions.remove();
-//	    vgap.map.explosions = vgap.map.paper.set();
+		if (this.special === undefined)
+			this.special = this.paper.set();
+        this.special.clear();
 	    
 		var a = { "text-anchor":"start", "fill":"white" };
 		
@@ -89,7 +84,7 @@ function wrapper () {
 				var b = { stroke: localStorage.planetNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(planet.x);
 	            var h = vgap.map.screenY(planet.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 10 * this.zoom).attr(b));
+				vgap.map.special.push(vgap.map.paper.circle(g, h, 10 * this.zoom).attr(b));
 //					this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "purple", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 
@@ -107,7 +102,7 @@ function wrapper () {
 				var c = { stroke: localStorage.starbaseNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(planet.x);
 	            var h = vgap.map.screenY(planet.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 15 * this.zoom).attr(c));
+				vgap.map.special.push(vgap.map.paper.circle(g, h, 15 * this.zoom).attr(c));
 //					this.drawCircle(planet.x, planet.y, 15 * this.zoom, { stroke: "blue", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 		}
@@ -118,7 +113,7 @@ function wrapper () {
 				var d = { stroke: localStorage.shipNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(d));
+				vgap.map.special.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(d));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "green", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 
@@ -134,7 +129,7 @@ function wrapper () {
 				var e = { stroke: localStorage.hypWarning, "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(e));
+				vgap.map.special.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(e));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
 			}
 		}
@@ -148,14 +143,13 @@ function wrapper () {
 //		
 //	};
 	
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
 	vgaPlanets.prototype.deselectAll = function() {
-		vgap.map.deselect();
-        vgap.closeLeft();
+		if (vgap.map.special !== undefined)
+			vgap.map.special.clear();
 
-	    vgap.map.explosions.remove();
-	    vgap.map.explosions = vgap.map.paper.set();
-	    
-		vgap.map.draw();
+        oldDeselectAll.apply(this, arguments);
 	};
 
 };

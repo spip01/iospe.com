@@ -56,12 +56,9 @@ function wrapper () {
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-//	 	:range doesn't work yet
-//	    $("#maxTurnsAway :range").each(function(a) {
-//	        localStorage[$(this).attr("id")] = $(this).val();
-//	    });
-	    
-	    localStorage.starbaseTurnsAway = $("#turnsAway #starbaseTurnsAway").val();
+		$("#MaxTurnsAway,input[type='range']").each(function(b) {
+			localStorage[$(this).attr("id")] = $(this).val();
+		});
 	    
 		oldSaveSettings.apply(this,arguments);
 	};
@@ -70,8 +67,9 @@ function wrapper () {
 	{
 		var colors = ["red", "orange", "yellow", "green", "blue", "purple"];
 
-//		vgap.map.explosions.remove();
-//		vgap.map.explosions = vgap.map.paper.set();
+		if (this.special === undefined)
+			this.special = this.paper.set();
+        this.special.clear();
 
 	    for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
@@ -89,7 +87,7 @@ function wrapper () {
 						var a = { stroke: colors[j], "stroke-width": 8 * this.zoom, "stroke-opacity": 1 };
 			            var g = vgap.map.screenX(planet.x);
 			            var h = vgap.map.screenY(planet.y);
-						vgap.map.explosions.push(vgap.map.paper.circle(g, h, 18 * this.zoom).attr(a));
+						vgap.map.special.push(vgap.map.paper.circle(g, h, 18 * this.zoom).attr(a));
 //						this.drawCircle(planet.x, planet.y, 18 * this.zoom, a);
 						break;
 					}
@@ -110,15 +108,13 @@ function wrapper () {
 	    return Math.min(inground, rate);
 	};
 	
-	vgapMap.prototype.deselectAll = function()
-	{
-		vgap.map.deselect();
-        vgap.closeLeft();
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.special !== undefined)
+			vgap.map.special.clear();
 
-        vgap.map.explosions.remove();
-	    vgap.map.explosions = vgap.map.paper.set();
-	    
-		vgap.map.draw();
+        oldDeselectAll.apply(this, arguments);
 	};
 
 };

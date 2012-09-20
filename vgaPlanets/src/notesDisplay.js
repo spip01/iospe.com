@@ -68,7 +68,7 @@ function wrapper () {	// notesDisplay.js
 	};
 		
 	vgapMap.prototype.drawNotes = function() {		// make the box red instead of yellow
-		if (this.notes == undefined)
+		if (this.notes === undefined)
 			this.notes = this.paper.set();
         this.notes.clear();
 	    
@@ -88,6 +88,15 @@ function wrapper () {	// notesDisplay.js
 	    }
     };
 	
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.notes !== undefined)
+			vgap.map.notes.clear();
+
+        oldDeselectAll.apply(this, arguments);
+	};
+
 }
 
 var script = document.createElement("script");

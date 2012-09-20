@@ -148,17 +148,8 @@ function wrapper () { // wrapper for injection
 			}
 		}
 		
-		for (var i = 0; i < vgap.myplanets.length; i++) {
-			var planet = vgap.myplanets[i];
-			if (planet.changed == 1)
-				vgap.map.savePlanet(planet);
-		}
-		
-		for (var i = 0; i < vgap.myships.length; i++) {
-			var ship = vgap.myships[i];
-			if (ship.changed == 1)
-				vgap.map.saveShip(ship);
-		}
+		vgap.map.savePlanets();
+		vgap.map.saveShips();
 	};
 
 	vgapMap.prototype.setTaxes = function()
@@ -227,10 +218,9 @@ function wrapper () { // wrapper for injection
 				planet.changed = 1;
 				this.drawCircle(x, y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
 			}
-			
-			if (planet.changed)					// if anything changed write the planet.  writing them all overflows buffers
-				vgap.map.savePlanet(planet);
 		}
+		
+		vgap.map.savePlanets();
 	};
 	   
 
@@ -399,27 +389,6 @@ function wrapper () { // wrapper for injection
 		for (var i=0; i < vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
 			
-			var neu = Math.log(vgap.map.mining(planet, planet.densityneutronium, planet.groundneutronium));
-			var tri = Math.log(vgap.map.mining(planet, planet.densitytritanium, planet.groundtritanium));
-			var dur = Math.log(vgap.map.mining(planet, planet.densityduranium, planet.groundduranium));
-			var mol = Math.log(vgap.map.mining(planet, planet.densitymolybdenum, planet.groundmolybdenum));
-			var rad = 10;
-			
-			if (neu > 4) {
-				this.drawCircle(planet.x, planet.y, rad * this.zoom, { stroke: "green", "stroke-width": neu, "stroke-opacity": 1 });
-				rad += neu;
-			}
-			if (tri > 4) {
-				this.drawCircle(planet.x, planet.y, rad * this.zoom, { stroke: "cyan", "stroke-width": tri, "stroke-opacity": 1 });
-				rad += tri;
-			}
-			if (dur > 4) {
-				this.drawCircle(planet.x, planet.y, rad * this.zoom, { stroke: "blue", "stroke-width": dur, "stroke-opacity": 1 });
-				rad += dur;
-			}
-			if (mol > 4)
-				this.drawCircle(planet.x, planet.y, rad * this.zoom, { stroke: "purple", "stroke-width": mol, "stroke-opacity": 1 });
-			
 			if (planet.neutronium > 400)
 				this.drawCircle(planet.x, planet.y, (26 + Math.sqrt(planet.neutronium - 400)) * this.zoom, { stroke: "red", "stroke-width": 2, "stroke-opacity": 1 });
 			if (planet.tritanium > 400)
@@ -437,10 +406,6 @@ function wrapper () { // wrapper for injection
 			var planet = vgap.myplanets[i];
 			var rad  = 10;
 			
-			if (planet.factories > 20) {
-				this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "green", "stroke-width": Math.log(planet.factories), "stroke-opacity": 1 });
-				rad = 10 + Math.log(planet.factories);
-			}
 			if (planet.megacredits + planet.supplies > 1000) {
 				this.drawCircle(planet.x, planet.y, (rad + Math.sqrt(planet.megacredits)) * this.zoom, { stroke: "blue", "stroke-width": 2, "stroke-opacity": 1 });
 				this.drawCircle(planet.x, planet.y, (rad + Math.sqrt(planet.supplies)) * this.zoom, { stroke: "purple", "stroke-width": 2, "stroke-opacity": 1 });
@@ -499,7 +464,6 @@ function wrapper () { // wrapper for injection
 				planet.friendlycode = b.toString();
 				planet.changed = 1;
 				this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-				vgap.map.savePlanet(planet);
 			}
 		}
 		
@@ -511,9 +475,11 @@ function wrapper () { // wrapper for injection
 				ship.friendlycode = b.toString();
 				ship.changed = 1;
 				this.drawCircle(ship.x, ship.y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-				vgap.map.saveShip(ship);
 			}
 		}
+		
+		vgap.map.savePlanets();
+		vgap.map.saveShips();
 	};
 	
 	vgapMap.prototype.mining = function(planet, percent, inground) {
@@ -521,7 +487,7 @@ function wrapper () { // wrapper for injection
 	    return Math.min(inground, rate);
 	};
 	
-	vgapMap.prototype.savePlanet = function(planet)			// taken from vgap planet save() because it saves everything not just 1 planet
+	vgapMap.prototype.newDataObject = function()
 	{
 	    var b = new dataObject();
         b.add("gameid", vgap.gameId);
@@ -531,32 +497,54 @@ function wrapper () { // wrapper for injection
         b.add("savekey", vgap.savekey);
         b.add("apikey", vgap.apikey);
         b.add("saveindex", 2);
-        b.add("Planet" + planet.id, vgap.serializePlanet(planet), false);
-        b.add("keycount", 11);
-    
-        planet.changed = 2;
-
-	    vgap.saveInProgress = 2;
-	    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+        return b;
+	};
+	
+	vgapMap.prototype.savePlanets = function()			// taken from vgap planet save() because it saves everything not just 1 planet
+	{
+	    var b = vgap.map.newDataObject();
+        var keycount = 10;
+        
+		for (var i = 0; i < vgap.myplanets.length; i++) {
+			var planet = vgap.myplanets[i];
+			if (planet.changed == 1) {
+				b.add("Planet" + planet.id, vgap.serializePlanet(planet), false);
+				planet.changed = 2;
+				++keycount;
+				
+				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
+			        b.add("keycount", keycount);
+				    vgap.saveInProgress = 2;
+				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+					keycount = 10;
+					b = vgap.map.newDataObject();
+				}
+			}
+		}
 	};
 
-	vgapMap.prototype.saveShip = function(ship)			// taken from vgap planet save() because it saves everything not just 1 planet
+	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
 	{
-	    var b = new dataObject();
-        b.add("gameid", vgap.gameId);
-        b.add("playerid", vgap.player.id);
-        b.add("turn", vgap.settings.turn);
-        b.add("version", vgap.version);
-        b.add("savekey", vgap.savekey);
-        b.add("apikey", vgap.apikey);
-        b.add("saveindex", 2);
-        b.add("Ship" + ship.id, vgap.serializeShip(ship), false);
-        b.add("keycount", 11);
-    
-        ship.changed = 2;
-
-	    vgap.saveInProgress = 2;
-	    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+	    var b = vgap.map.newDataObject();
+        
+        var keycount = 10;
+        
+		for (var i = 0; i < vgap.myships.length; i++) {
+			var ship = vgap.myships[i];
+			if (ship.changed == 1) {
+				b.add("Ship" + ship.id, vgap.serializeShip(ship), false);
+				ship.changed = 2;
+				++keycount;
+				
+				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
+			        b.add("keycount", keycount);
+				    vgap.saveInProgress = 2;
+				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+					keycount = 10;
+					b = vgap.map.newDataObject();
+				}
+			}
+		}
 	};
 
 	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
@@ -701,24 +689,6 @@ function wrapper () { // wrapper for injection
 
 	vgapMap.prototype.useNotes = function () 
 	{
-//		var x = 1000;
-//		var y = 3000;
-//		var a = {"text-anchor": "start", fill: "white" };
-//		this.drawCircle(x, y, 15 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-//		this.drawText(x+50, y, "planet done", a);
-//		y -= 30;
-//		this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-//		this.drawText(x+50, y, "ship HYP", a);
-//		y -= 30;
-//		this.drawCircle(x, y, 25 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-//		this.drawText(x+50, y, "built factory", a);
-//		y -= 30;
-//		this.drawCircle(x, y, 30 * this.zoom, { stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-//		this.drawText(x+50, y, "built defense", a);
-//		y -= 30;
-//		this.drawCircle(x, y, 35 * this.zoom, { stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-//		this.drawText(x+50, y, "built mines", a);
-
 		for (var i = 0; i < vgap.notes.length; i++) {
 			var note = vgap.notes[i];
 			switch (note.targettype) {

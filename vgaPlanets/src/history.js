@@ -94,7 +94,7 @@ function wrapper () { // history.js
         
         for (var i = 0; i < b.rst.planets.length; ++i) {
             var planet = b.rst.planets[i];
-            if (vgap.history[a].planets[planet.id] == undefined || planet.ownerid == player)
+            if (vgap.history[a].planets[planet.id] === undefined || planet.ownerid == player)
                 vgap.history[a].planets[planet.id] = planet;
         }
         
@@ -130,7 +130,7 @@ function wrapper () { // history.js
         for (var i = 0; i < b.rst.messages.length; ++i) {
             var message = b.rst.messages[i];
             if (message.messagetype == 10) {
-            	if (vgap.history[a].messageMap[message.x+","+message.y] == undefined) {
+            	if (vgap.history[a].messageMap[message.x+","+message.y] === undefined) {
             		vgap.history[a].messageMap[message.x+","+message.y] = message;
             		vgap.history[a].messages.push(message);
             	}
@@ -162,7 +162,7 @@ function wrapper () { // history.js
 	
 	        for (var i = 0; i < vgap.planets.length; ++i) {
 	        	var planet = vgap.planets[i];
-	        	if (vgap.history[t].planets[i] != undefined) {
+	        	if (vgap.history[t].planets[i] !== undefined) {
 	        		vgap.planets[i] = vgap.history[t].planets[i];
 	        		planet = vgap.planets[i];
 	        	}
@@ -186,7 +186,7 @@ function wrapper () { // history.js
 	        
 	        for (var i = 0; i < vgap.ships.length; ++i) {
 	        	var ship = vgap.ships[i];
-	        	if (vgap.shipMap[ship.x+","+ship.y] == undefined)
+	        	if (vgap.shipMap[ship.x+","+ship.y] === undefined)
 	        		vgap.shipMap[ship.x+","+ship.y] = [];
 	        	vgap.shipMap[ship.x+","+ship.y].push(ship);
 	        }	

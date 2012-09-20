@@ -14,10 +14,81 @@ function wrapper () {	// playerColors.js
 
 		oldShowSettings.apply(this,arguments);
 		
+    	if(typeof(Storage)!=="undefined") {
+	    	if (localStorage.colors == null) {
+	    		localStorage.filterZoom = "true";
+				localStorage["colors.S0"] = "#808080";
+				localStorage["colors.E0"] = "#101010";
+	    		this.setColors();
+	    	}
+    	}
+		
 		this.buildPlayerColors();
 		this.showPlayerColors();
 	};
 
+	vgapDashboard.prototype.setColors = function () {
+		
+		for (var i=1; i<=vgap.game.slots; ++i) {
+			rgb = this.getColorSlot(i);
+			localStorage["colors.S" + i] = rgb;
+			localStorage["colors.E" + i] = this.dim(rgb, .6);
+		}
+	};
+	
+	vgapDashboard.prototype.randomPlayerColors = function () {
+		var slots = [vgap.game.slots];
+		
+		for (var i=1; i<=vgap.game.slots;) {
+			j = Math.random() * (vgap.game.slots - 1) + 1;
+			j = j.toFixed(0);
+			if (slots[j] === true)
+				continue;
+			
+			slots[j] = true;
+			rgb = this.getColorSlot(i);
+			localStorage["colors.S" + j] = rgb;
+			localStorage["colors.E" + j] = this.dim(rgb, .6);
+			++i;
+		}
+	};
+	
+	vgapDashboard.prototype.getColorSlot = function (i) {
+		var s = (i-1) / vgap.game.slots * 2 * Math.PI;
+		
+		var r = (Math.cos(s) + 1) * 127;
+		var g = (Math.cos(s + 2 * Math.PI / 3) + 1) * 127;
+		var b = (Math.cos(s + 4 * Math.PI / 3) + 1) * 127;
+		
+		var rs = "0" + Number(r.toFixed(0)).toString(16);
+		var gs = "0" + Number(g.toFixed(0)).toString(16);
+		var bs = "0" + Number(b.toFixed(0)).toString(16);
+		
+		var rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
+		
+		return rgb;
+	};
+	
+	vgapDashboard.prototype.dim = function(rgb, dim) {
+		var r = parseInt(rgb.slice(1,3), 16);
+		var g = parseInt(rgb.slice(3,5), 16);
+		var b = parseInt(rgb.slice(5,7), 16);
+		
+		r *= dim;
+		g *= dim;
+		b *= dim;
+		
+		var rs = "0" + Number(r.toFixed(0)).toString(16);
+		var gs = "0" + Number(g.toFixed(0)).toString(16);
+		var bs = "0" + Number(b.toFixed(0)).toString(16);
+		
+		return "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
+	};
+	
+	vgapMap.prototype.getColors = function (player) {
+		return {start:localStorage["colors.S"+player], end:localStorage["colors.E"+player]};
+	};
+	
 	vgapDashboard.prototype.buildPlayerColors = function() {
 		var b = "";
 		
@@ -31,7 +102,8 @@ function wrapper () {	// playerColors.js
 			b +=   "<td><div id='showExample.S"+i+"' /></td></tr>";
 		}
 		
-		b += "<tr><td colspan=2><button type='button' onmousedown='vgap.dash.resetPlayerColors()'>Reset Player Colors</button></td></tr></table></div>";
+		b += "<tr><td colspan=2><button type='button' onmousedown='vgap.dash.resetPlayerColors()'>Reset Player Colors</button></td>";
+		b +=     "<td colspan=2><button type='button' onmousedown='vgap.dash.randomPlayerColors()'>Randomize Player Colors</button></td></tr></table></div>";
 		
 		$("#AccountSettings").replaceWith(b);
 	};
@@ -45,22 +117,18 @@ function wrapper () {	// playerColors.js
 	};
 
 	vgapDashboard.prototype.resetPlayerColors = function() {
-		vgap.map.setColors();
-		
-		$("#AccountSettings,input[type='color']").each(function(b) {
-			$(this).val(localStorage[$(this).attr("id")]);
-		});
-		
-		vgap.dash.showPlayerColors();
+		this.setColors();
+		this.buildPlayerColors();
+		this.showPlayerColors();
 	};
 	
 	vgapDashboard.prototype.showPlayerColors = function() {
 		
 		for (var i=1; i<=vgap.game.slots; ++i) {
-			if (vgap.dash.paper == undefined)
+			if (vgap.dash.paper === undefined)
 				vgap.dash.paper = [];
 			
-			if (vgap.dash.paper["colors.S"+i] == undefined)
+			if (vgap.dash.paper["colors.S"+i] === undefined)
 				vgap.dash.paper["colors.S"+i] = Raphael(document.getElementById("showExample.S"+i), 90, 30);
 			
 			var paper = vgap.dash.paper["colors.S"+i];
