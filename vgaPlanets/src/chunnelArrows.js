@@ -29,18 +29,10 @@ function wrapper () { // chunnelArrows.js
     	vgap.map.centerY = Number(localStorage.startY);
     };
 
-	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
-	
-	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.waypoints !== undefined)
-			vgap.map.waypoints.clear();
-
-		if (vgap.map.special !== undefined)
-			vgap.map.special.clear();
-
-        oldDeselectAll.apply(this, arguments);
-	};
-
+    vgapMap.prototype.getColors = function(player) {
+        return {start: localStorage["colors.S" + player],end: localStorage["colors.E" + player]};
+    };
+    
 	var oldProcessLoad = vgaPlanets.prototype.processLoad;
     vgaPlanets.prototype.processLoad = function(f) {
     	
@@ -113,7 +105,7 @@ function wrapper () { // chunnelArrows.js
 	        localStorage[$(this).attr("id")] = $(this).is(":checked");
 	    });
 
-		$("#waypointOptions,input[vs='vs']").each(function(b) {
+		$("#waypointOptions input[vs='vs']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 
@@ -138,13 +130,10 @@ function wrapper () { // chunnelArrows.js
 	
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-		if (this.waypoints === undefined)
-			this.waypoints = this.paper.set();
-        this.waypoints.clear();
+		if (this.waypoints !== undefined)
+	        this.waypoints.remove();
+        this.waypoints = this.paper.set();
 
-		if (this.special !== undefined)
-			this.special.clear();
-        
         var d = {"stroke-width": 2, "stroke-opacity": 0.5};
 	        
         if (localStorage.filterZoom == "true" && this.zoom == 40 && (ship = vgap.map.activeShip) != null) {
@@ -212,20 +201,20 @@ function wrapper () { // chunnelArrows.js
 	};
 	
     vgapMap.prototype.shipHistory = function (a) {
-		if (this.special === undefined)
-			this.special = this.paper.set();
-		this.special.clear();
+		if (this.special !== undefined)
+			this.special.remove();
+		this.special = this.paper.set();
 		
 		var ship = vgap.getShip(a);
 	    var c = this.getColors(ship.ownerid);
 
-		var d = { stroke:c.start, "stroke-width":2, "stroke-opacity":.5 };
-
-		var tox; //= ship.targetx;
-		var toy; //= ship.targety;
+		var tox;// = ship.targetx;
+		var toy;// = ship.targety;
 		var fromx = ship.x;
 		var fromy = ship.y;
 
+		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33 };
+		
 		if (localStorage.warpCircle)
 			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(d));
 		
@@ -236,15 +225,22 @@ function wrapper () { // chunnelArrows.js
 			fromx = ship.history[j].x;
 			fromy = ship.history[j].y;
 			
-			var i = vgap.getNebulaIntensity(tox, toy);
-			if (i > 40) {
-				var v = { fill:c.start, "fill-opacity":.25, "stroke-opacity":0 };
-				vgap.map.special.push(vgap.map.paper.circle(this.screenX(tox), this.screenY(toy), 4000 / i * this.zoom).attr(v));
-			}
-			
 			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(d));
 		}
-	};    
+	}; 
+	
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.waypoints !== undefined)
+			vgap.map.waypoints.remove();
+
+		if (vgap.map.special !== undefined)
+			vgap.map.special.remove();
+
+        oldDeselectAll.apply(this, arguments);
+	};
+
 
 }
 

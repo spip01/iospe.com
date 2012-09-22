@@ -48,7 +48,7 @@ function wrapper () {	// notesDisplay.js
 			localStorage[$(this).attr("id")] = $(this).is(":checked");
     	});
 
-		$("#notesOptions,input[type='color']").each(function(b) {
+		$("#notesOptions input[type='color']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 
@@ -68,9 +68,9 @@ function wrapper () {	// notesDisplay.js
 	};
 		
 	vgapMap.prototype.drawNotes = function() {		// make the box red instead of yellow
-		if (this.notes === undefined)
-			this.notes = this.paper.set();
-        this.notes.clear();
+		if (this.notes !== undefined)
+	        this.notes.remove();
+        this.notes = this.paper.set();
 	    
 	    if (localStorage.noteDisplay == "true") {
 		    for (var c = 0; c < vgap.notes.length; c++) {
@@ -92,7 +92,7 @@ function wrapper () {	// notesDisplay.js
 	
 	vgaPlanets.prototype.deselectAll = function() {
 		if (vgap.map.notes !== undefined)
-			vgap.map.notes.clear();
+			vgap.map.notes.remove();
 
         oldDeselectAll.apply(this, arguments);
 	};

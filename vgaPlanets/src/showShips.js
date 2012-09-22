@@ -119,10 +119,10 @@ function wrapper () { // wrapper for injection
 		var offy = vgap.map.shipListOffset;
 		var colors = ["aqua", "fuchsia", "lime", "red", "yellow", "blue", "green", "purple", "silver", "teal", "maroon", "navy", "gray", "olive", "white"];
 
-		if (this.ships === undefined)
-			this.ships = this.paper.set();
-        this.ships.clear();
-    	
+		if (this.ships !== undefined)
+	        this.ships.remove();
+	    this.ships = this.paper.set();
+	    
     	var hull = vgap.getArray(nudata.hulls, id);
 		var b = "<li onclick='' style=color:"+colors[offy]+" disabled='disabled'>"+hull.name+"</li>";
     	$("#shipList ul li:contains("+hull.name+")").replaceWith(b);

@@ -63,7 +63,7 @@ function wrapper () {
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 
-		$("#notReadyOptions,input[type='color']").each(function(b) {
+		$("#notReadyOptions input[type='color']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 
@@ -72,9 +72,9 @@ function wrapper () {
 
 	vgapMap.prototype.checkReady = function () 
 	{
-		if (this.special === undefined)
-			this.special = this.paper.set();
-        this.special.clear();
+		if (this.special !== undefined)
+	        this.special.remove();
+        this.special = this.paper.set();
 	    
 		var a = { "text-anchor":"start", "fill":"white" };
 		
@@ -147,7 +147,7 @@ function wrapper () {
 	
 	vgaPlanets.prototype.deselectAll = function() {
 		if (vgap.map.special !== undefined)
-			vgap.map.special.clear();
+			vgap.map.special.remove();
 
         oldDeselectAll.apply(this, arguments);
 	};

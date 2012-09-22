@@ -15,8 +15,7 @@ function wrapper () {	// playerColors.js
 		oldShowSettings.apply(this,arguments);
 		
     	if(typeof(Storage)!=="undefined") {
-	    	if (localStorage.colors == null) {
-	    		localStorage.filterZoom = "true";
+	    	if (localStorage.colors === undefined) {
 				localStorage["colors.S0"] = "#808080";
 				localStorage["colors.E0"] = "#101010";
 	    		this.setColors();
@@ -36,7 +35,7 @@ function wrapper () {	// playerColors.js
 		}
 	};
 	
-	vgapDashboard.prototype.randomPlayerColors = function () {
+	vgapDashboard.prototype.setRandomColors = function () {
 		var slots = [vgap.game.slots];
 		
 		for (var i=1; i<=vgap.game.slots;) {
@@ -92,14 +91,14 @@ function wrapper () {	// playerColors.js
 	vgapDashboard.prototype.buildPlayerColors = function() {
 		var b = "";
 		
-		b += "<div id=AccountSettings'>";
+		b += "<div id='AccountSettings'>";
 		b += "<br><h3>Color Settings</h3><table>";
 
 		for (var i=1; i<=vgap.game.slots; ++i) {
 			b += "<tr><td>Player "+i+": "+vgap.races[i].shortname+"</td>";
 			b +=   "<td><input id='colors.S"+i+"' type='color' onchange='vgap.dash.setPlayerColors()' value=" + localStorage["colors.S"+i] + " /></td>";
 			b +=   "<td><input id='colors.E"+i+"' type='color' onchange='vgap.dash.setPlayerColors()' value=" + localStorage["colors.E"+i] + " /></td>";
-			b +=   "<td><div id='showExample.S"+i+"' /></td></tr>";
+			b +=   "<td><div id='showExample.S"+i+"'></div></td></tr>";
 		}
 		
 		b += "<tr><td colspan=2><button type='button' onmousedown='vgap.dash.resetPlayerColors()'>Reset Player Colors</button></td>";
@@ -108,8 +107,16 @@ function wrapper () {	// playerColors.js
 		$("#AccountSettings").replaceWith(b);
 	};
 	
+	vgapDashboard.prototype.buildColorTable = function() {
+		$("#AccountSettings input[type='color']").each(function(b) {
+			var id = $(this).attr("id");
+			var b = "<input id='"+id+"' type='color' onchange='vgap.dash.setPlayerColors()' value=" + localStorage[id] + " />";
+			$(this).replaceWith(b);
+		});
+	};
+	
 	vgapDashboard.prototype.setPlayerColors = function() {
-		$("#AccountSettings,input[type='color']").each(function(b) {
+		$("#AccountSettings input[type='color']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 
@@ -118,7 +125,13 @@ function wrapper () {	// playerColors.js
 
 	vgapDashboard.prototype.resetPlayerColors = function() {
 		this.setColors();
-		this.buildPlayerColors();
+		this.buildColorTable();
+		this.showPlayerColors();
+	};
+	
+	vgapDashboard.prototype.randomPlayerColors = function() {
+		this.setRandomColors();
+		this.buildColorTable();
 		this.showPlayerColors();
 	};
 	
@@ -130,10 +143,15 @@ function wrapper () {	// playerColors.js
 			
 			if (vgap.dash.paper["colors.S"+i] === undefined)
 				vgap.dash.paper["colors.S"+i] = Raphael(document.getElementById("showExample.S"+i), 90, 30);
-			
 			var paper = vgap.dash.paper["colors.S"+i];
-			var canvas = paper.set();
-		    canvas.clear();
+			
+			if (vgap.dash.canvas === undefined)
+				vgap.dash.canvas = [];
+			
+			if (vgap.dash.canvas["colors.S"+i] !== undefined)
+				vgap.dash.canvas["colors.S"+i].remove();
+			vgap.dash.canvas["colors.S"+i] = paper.set();
+			var canvas = vgap.dash.canvas["colors.S"+i];
 			
 		    var s = localStorage["colors.S"+i];
 		    var e = localStorage["colors.E"+i];

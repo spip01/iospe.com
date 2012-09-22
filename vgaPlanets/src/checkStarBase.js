@@ -56,7 +56,7 @@ function wrapper () {
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-		$("#MaxTurnsAway,input[type='range']").each(function(b) {
+		$("#MaxTurnsAway input[type='range']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 	    
@@ -67,10 +67,10 @@ function wrapper () {
 	{
 		var colors = ["red", "orange", "yellow", "green", "blue", "purple"];
 
-		if (this.special === undefined)
-			this.special = this.paper.set();
-        this.special.clear();
-
+		if (this.special !== undefined)
+	        this.special.remove();
+        this.special = this.paper.set();
+	    
 	    for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
 
@@ -112,7 +112,7 @@ function wrapper () {
 	
 	vgaPlanets.prototype.deselectAll = function() {
 		if (vgap.map.special !== undefined)
-			vgap.map.special.clear();
+			vgap.map.special.remove();
 
         oldDeselectAll.apply(this, arguments);
 	};

@@ -44,11 +44,11 @@ function wrapper () {	// hyperJump.js
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-	    $("#hyperjumpOptions,:checkbox").each(function(a) {
+	    $("#hyperjumpOptions :checkbox").each(function(a) {
 	        localStorage[$(this).attr("id")] = $(this).is(":checked");
 	    });
 	    
-		$("#hyperjumpOptions,input[type='color']").each(function(b) {
+		$("#hyperjumpOptions input[type='color']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 	    

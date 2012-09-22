@@ -23,7 +23,9 @@ function wrapper () { // draw.js
 	
     vgapMap.prototype.drawMap = function() {
         if (!vgap.map.canvasRendered) {
-	        vgap.map.paper.clear();
+    		if (this.canvas !== undefined)
+    			this.canvas.remove();
+    		this.canvas = this.paper.set();
 	        
 	        if (this.zoom < 20) {
 	        	vgap.map.drawNotes();
@@ -78,10 +80,10 @@ function wrapper () { // draw.js
     };
     	
     vgapMap.prototype.drawPlanets = function() {
-    	if (this.planets === undefined)
-    		this.planets = this.paper.set();
-   		this.planets.clear();	
-        
+		if (this.planets !== undefined)
+	        this.planets.remove();
+        this.planets = this.paper.set();
+	            
         if (vgap.nebulas) {
         	for (var p = 0; p < vgap.nebulas.length; p++) {
                 var N = vgap.nebulas[p];
@@ -163,10 +165,10 @@ function wrapper () { // draw.js
     };
     
     vgapMap.prototype.drawStarBases = function() {
-    	if (this.starbases === undefined)
-    		this.starbases = this.paper.set();
-    	this.starbases.clear();
-
+		if (this.starbases !== undefined)
+	        this.starbases.remove();
+        this.starbases = this.paper.set();
+	    
         var G =  Math.min(20, Math.max(8 * this.zoom, 6));
         var g = G / 2;
 	    var a = {stroke: "white","stroke-width": "1","stroke-opacity": .75};
@@ -187,10 +189,10 @@ function wrapper () { // draw.js
 	};
     
     vgapMap.prototype.drawShips = function() {
-    	if (this.ships === undefined)
-    		this.ships = this.paper.set();
-    	this.ships.clear();
-
+		if (this.ships !== undefined)
+	        this.ships.remove();
+        this.ships = this.paper.set();
+	    
         var G =  Math.min(10, Math.max(6 * this.zoom, 5));
         
     	for (var i = 0; i < vgap.ships.length; ++i) {
@@ -212,10 +214,10 @@ function wrapper () { // draw.js
     
 	vgapMap.prototype.drawWaypoints = function()
 	{        
-		if (this.waypoints === undefined)
-			this.waypoints = this.paper.set();
-        this.waypoints.clear();
-        
+		if (this.waypoints !== undefined)
+	        this.waypoints.remove();
+        this.waypoints = this.paper.set();
+	            
 		var d = {"stroke-width":2, "stroke-opacity":0.5};
 		
 		for (var i=0; i<vgap.ships.length; ++i) {
@@ -254,10 +256,10 @@ function wrapper () { // draw.js
 	};
 
 	vgapMap.prototype.drawExplosions = function() {
-    	if (this.explosions === undefined)
-    		this.explosions = this.paper.set();
-    	this.explosions.clear();
-
+		if (this.explosions !== undefined)
+	        this.explosions.remove();
+        this.explosions = this.paper.set();
+	    
         var G =  Math.min(10, Math.max(8 * this.zoom, 6));
         var a = {stroke: "red","stroke-width": "1","stroke-opacity": 0.5};
 
@@ -277,10 +279,10 @@ function wrapper () { // draw.js
 	};
         
     vgapMap.prototype.drawIonStorms = function() {
-    	if (this.ionstorms === undefined)
-    		this.ionstorms = this.paper.set();
-    	this.ionstorms.clear();
-    	
+		if (this.ionstorms !== undefined)
+	        this.ionstorms.remove();
+        this.ionstorms = this.paper.set();
+	        	
         for (var b = 0; b < vgap.ionstorms.length; b++) {
             var d = vgap.ionstorms[b];
             
@@ -312,9 +314,10 @@ function wrapper () { // draw.js
     };
     
     vgapMap.prototype.drawMinefields = function() {
-    	if (this.minefields === undefined)
-    		this.minefields = this.paper.set();
-    	this.minefields.clear();
+		if (this.minefields !== undefined)
+	        this.minefields.remove();
+        this.minefields = this.paper.set();
+	    
 
     	for (var c = 0; c < vgap.minefields.length; c++) {
             var d = vgap.minefields[c];
@@ -324,35 +327,34 @@ function wrapper () { // draw.js
         }
     };
     
+    var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+    
 	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.waypoints !== undefined)
-			vgap.map.waypoints.clear();
-
-		if (vgap.map.special !== undefined)
-			vgap.map.special.clear();
-
-		if (vgap.map.minefields !== undefined)
-			vgap.map.minefields.clear();
-
-		if (vgap.map.ionstorms !== undefined)
-			vgap.map.ionstorms.clear();
-
-		if (vgap.map.explosions !== undefined)
-			vgap.map.explosions.clear();
-
-		if (vgap.map.ships !== undefined)
-			vgap.map.ships.clear();
-
-		if (vgap.map.starbases !== undefined)
-			vgap.map.starbases.clear();
+		if (vgap.map.canvas !== undefined)
+			vgap.map.canvas.remove();
 
 		if (vgap.map.planets !== undefined)
-			vgap.map.planets.clear();
+			vgap.map.planets.remove();
 
-		if (vgap.map.notes !== undefined)
-			vgap.map.notes.clear();
+		if (vgap.map.starbases !== undefined)
+			vgap.map.starbases.remove();
 
-		vgap.map.draw();
+		if (vgap.map.ships !== undefined)
+			vgap.map.ships.remove();
+
+		if (vgap.map.waypoints !== undefined)
+			vgap.map.waypoints.remove();
+
+		if (vgap.map.explosions !== undefined)
+			vgap.map.explosions.remove();
+
+		if (vgap.map.ionstorms !== undefined)
+			vgap.map.ionstorms.remove();
+
+		if (vgap.map.minefields !== undefined)
+			vgap.map.minefields.remove();
+
+        oldDeselectAll.apply(this, arguments);
 	};
 
 }
