@@ -68,11 +68,11 @@ function wrapper () {	// notesDisplay.js
 	};
 		
 	vgapMap.prototype.drawNotes = function() {		// make the box red instead of yellow
-		if (this.notes !== undefined)
-	        this.notes.remove();
-        this.notes = this.paper.set();
-	    
 	    if (localStorage.noteDisplay == "true") {
+			if (this.notes !== undefined)
+		        this.notes.remove();
+	        this.notes = this.paper.set();
+	    
 		    for (var c = 0; c < vgap.notes.length; c++) {
 		        var d = vgap.notes[c];
 		        if (d.targettype == 1 && d.body.length > 0) {
@@ -91,10 +91,12 @@ function wrapper () {	// notesDisplay.js
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
 	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.notes !== undefined)
-			vgap.map.notes.remove();
-		vgap.map.notes = vgap.map.paper.set();
-
+	    if (localStorage.noteDisplay == "true") {
+			if (vgap.map.notes !== undefined)
+				vgap.map.notes.remove();
+			vgap.map.notes = vgap.map.paper.set();
+	    }
+	    
         oldDeselectAll.apply(this, arguments);
 	};
 

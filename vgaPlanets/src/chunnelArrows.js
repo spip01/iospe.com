@@ -193,7 +193,7 @@ function wrapper () { // chunnelArrows.js
 	}
   };
 	
-	var oldSelectShip = vgapMap.prototype.selectShip;
+    var oldSelectShip = vgapMap.prototype.selectShip;
 	vgapMap.prototype.selectShip = function(a) {
 		oldSelectShip.apply(this, arguments);
 
@@ -213,7 +213,8 @@ function wrapper () { // chunnelArrows.js
 		var fromx = ship.x;
 		var fromy = ship.y;
 
-		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33, fill:c.start, "fill-opacity":.1 };
+		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33 };
+		var e = { "stroke-opacity":0, fill:c.start, "fill-opacity":.075 };
 		
 		if (localStorage.warpCircle)
 			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(d));
@@ -226,7 +227,7 @@ function wrapper () { // chunnelArrows.js
 			fromy = ship.history[j].y;
 			
 			if (ship.hullid == 54 && vgap.getNebulaIntensity(tox, toy) > 0) 
-				vgap.map.special.push(vgap.map.paper.circle(this.screenX(tox), this.screenY(toy), 100 * this.zoom).attr(d));
+				vgap.map.special.push(vgap.map.paper.circle(this.screenX(tox), this.screenY(toy), 100 * this.zoom).attr(e));
 			
 			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(d));
 		}

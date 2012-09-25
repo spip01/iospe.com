@@ -68,11 +68,11 @@ function wrapper () {	// hyperJump.js
 
 				if (dist >= 340 && dist <= 360) {
 					a["stroke"] = localStorage.ringColor;
-					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
+					this.explosions.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
 				}	
 				else if (dist >= 338 && dist <= 362) {
 					a["stroke"] = "yellow";
-					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
+					this.explosions.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
 				}
 			}
 		
@@ -81,14 +81,14 @@ function wrapper () {	// hyperJump.js
 		a["stroke"] = localStorage.ringColor;
 
 		if (localStorage.hyperjumpRing == "true") {
-			this.special.push(this.paper.circle(g, h, 340 * this.zoom).attr(a));
-			this.special.push(this.paper.circle(g, h, 360 * this.zoom).attr(a));
+			this.explosions.push(this.paper.circle(g, h, 340 * this.zoom).attr(a));
+			this.explosions.push(this.paper.circle(g, h, 360 * this.zoom).attr(a));
 		}
 		else {
-			this.special.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
+			this.explosions.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
 			a["stroke-width"] = 20;
 			a["stroke-opacity"] = .25;
-			this.special.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
+			this.explosions.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
 		}
 	};
 	
@@ -96,9 +96,9 @@ function wrapper () {	// hyperJump.js
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
 	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.special !== undefined)
-			vgap.map.special.remove();
-		vgap.map.special = vgap.map.paper.set();
+		if (vgap.map.explosions !== undefined)
+			vgap.map.explosions.remove();
+		vgap.map.explosions = vgap.map.paper.set();
 
         oldDeselectAll.apply(this, arguments);
 	};

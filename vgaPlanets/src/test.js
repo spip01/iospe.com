@@ -7,7 +7,7 @@
 //@version 1.1
 //==/UserScript==
 
-function wrapper () { // wrapper for injection
+function wrapper () { // test.js
 
 	var oldLoadControls = vgapMap.prototype.loadControls; 
 	vgapMap.prototype.loadControls = function () {
@@ -16,6 +16,7 @@ function wrapper () { // wrapper for injection
 
 		var b = "";
         b += "<li onclick='vgap.map.showMinerals();'>Show Minerals</li>";
+        b += "<li onclick='vgap.map.showSupplies();'>Show Supplies</li>";
         
         $("#MapTools li:contains('Measure')").after(b);
            
@@ -405,26 +406,26 @@ function wrapper () { // wrapper for injection
 	
 	vgapMap.prototype.showMinerals = function () 
 	{
+		var c = { "stroke-width": 2, "stroke-opacity": 1 };
 		for (var i=0; i < vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
 	        var g = vgap.map.screenX(planet.x);
 	        var h = vgap.map.screenY(planet.y);
-			var c = { "stroke-width": 2, "stroke-opacity": 1 };
-			
+						
 			if (planet.neutronium > 400) {
-				c["stroke"] = "red";
+				c["stroke"] = vgap.dash.getColorSlot(1);
 				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.neutronium - 400)) * this.zoom).attr(c));
 			}
-			if (planet.tritanium > 400) {
-				c["stroke"] = "orange";
-				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.tritanium - 400)) * this.zoom).attr(c));
-			}
 			if (planet.duranium > 400) {
-				c["stroke"] = "yellow";
+				c["stroke"] = vgap.dash.getColorSlot(3);
 				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.duranium - 400)) * this.zoom).attr(c));
 			}
+			if (planet.tritanium > 400) {
+				c["stroke"] = vgap.dash.getColorSlot(5);
+				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.tritanium - 400)) * this.zoom).attr(c));
+			}
 			if (planet.molybdenum > 400) {
-				c["stroke"] = "beige";
+				c["stroke"] = vgap.dash.getColorSlot(7);
 				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.molybdenum - 400)) * this.zoom).attr(c));
 			}
 		}
@@ -432,18 +433,17 @@ function wrapper () { // wrapper for injection
 
 	vgapMap.prototype.showSupplies = function () 
 	{
+		var c = { "stroke-width": 2, "stroke-opacity": 1 };
 		for (var i=0; i<vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
-			var rad  = 10;
 	        var g = vgap.map.screenX(planet.x);
 	        var h = vgap.map.screenY(planet.y);
-			var c = { "stroke-width": 2, "stroke-opacity": 1 };
 			
 			if (planet.megacredits + planet.supplies > 1000) {
-				c["stroke"] = "blue";
-				this.special.push(this.paper.circle(g, h, (rad + Math.sqrt(planet.megacredits)) * this.zoom).attr(c));
-				c["stroke"] = "purple";
-				this.special.push(this.paper.circle(g, h, (rad + Math.sqrt(planet.supplies)) * this.zoom).attr(c));
+				c["stroke"] = vgap.dash.getColorSlot(9);
+				this.special.push(this.paper.circle(g, h, (10 + Math.sqrt(planet.megacredits)) * this.zoom).attr(c));
+				c["stroke"] = vgap.dash.getColorSlot(11);
+				this.special.push(this.paper.circle(g, h, (10 + Math.sqrt(planet.supplies)) * this.zoom).attr(c));
 			}
 		}
 	};
@@ -530,22 +530,21 @@ function wrapper () { // wrapper for injection
 	    return Math.min(inground, rate);
 	};
 	
-	vgapMap.prototype.newDataObject = function()
-	{
-	    var b = new dataObject();
-        b.add("gameid", vgap.gameId);
-        b.add("playerid", vgap.player.id);
-        b.add("turn", vgap.settings.turn);
-        b.add("version", vgap.version);
-        b.add("savekey", vgap.savekey);
-        b.add("apikey", vgap.apikey);
-        b.add("saveindex", 2);
-        return b;
+	dataObject.prototype.reset = function() {
+        this.data = "";
+        this.add("gameid", vgap.gameId);
+        this.add("playerid", vgap.player.id);
+        this.add("turn", vgap.settings.turn);
+        this.add("version", vgap.version);
+        this.add("savekey", vgap.savekey);
+        this.add("apikey", vgap.apikey);
+        this.add("saveindex", 2);
 	};
-	
+
 	vgapMap.prototype.savePlanets = function()			// taken from vgap planet save() because it saves everything not just 1 planet
 	{
-	    var b = vgap.map.newDataObject();
+	    var b = new dataObject();
+	    b.reset();
         var keycount = 10;
         
 		for (var i = 0; i < vgap.myplanets.length; i++) {
@@ -560,8 +559,7 @@ function wrapper () { // wrapper for injection
 				    vgap.saveInProgress = 2;
 				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
 					keycount = 10;
-					delete b;
-					b = vgap.map.newDataObject();
+					b.reset();
 				}
 			}
 		}
@@ -569,7 +567,8 @@ function wrapper () { // wrapper for injection
 
 	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
 	{
-	    var b = vgap.map.newDataObject();
+	    var b = new dataObject();
+	    b.reset();
         var keycount = 10;
         
 		for (var i = 0; i < vgap.myships.length; i++) {
@@ -585,8 +584,7 @@ function wrapper () { // wrapper for injection
 				    console.log(b);
 				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
 					keycount = 10;
-					delete b;
-					b = vgap.map.newDataObject();
+					b.reset();
 				}
 			}
 		}

@@ -7,7 +7,7 @@
 // @version 1.0
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () {	// checkstarbase.js
 	
 	var oldLoadControls = vgapMap.prototype.loadControls; 
 	vgapMap.prototype.loadControls = function () {
@@ -67,9 +67,9 @@ function wrapper () {
 	{
 		var colors = ["red", "orange", "yellow", "green", "blue", "purple"];
 
-		if (this.special !== undefined)
-	        this.special.remove();
-        this.special = this.paper.set();
+//		if (this.explosions !== undefined)
+//	        this.explosions.remove();
+//        this.explosions = this.paper.set();
 	    
 	    for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
@@ -87,7 +87,7 @@ function wrapper () {
 						var a = { stroke: colors[j], "stroke-width": 8 * this.zoom, "stroke-opacity": 1 };
 			            var g = vgap.map.screenX(planet.x);
 			            var h = vgap.map.screenY(planet.y);
-						vgap.map.special.push(vgap.map.paper.circle(g, h, 18 * this.zoom).attr(a));
+						vgap.map.explosions.push(vgap.map.paper.circle(g, h, 18 * this.zoom).attr(a));
 //						this.drawCircle(planet.x, planet.y, 18 * this.zoom, a);
 						break;
 					}
@@ -111,9 +111,9 @@ function wrapper () {
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
 	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.special !== undefined) 
-			vgap.map.special.remove();
-		vgap.map.special = vgap.map.paper.set();
+		if (vgap.map.explosions !== undefined) 
+			vgap.map.explosions.remove();
+		vgap.map.explosions = vgap.map.paper.set();
 		
         oldDeselectAll.apply(this, arguments);
 	};

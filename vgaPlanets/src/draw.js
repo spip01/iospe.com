@@ -10,20 +10,9 @@
 
 function wrapper () { // draw.js
 
-	vgapMap.prototype.draw = function() {
-	    this.paper.safari();
-	    vgap.connectionsActivated = 0;
-	    vgap.planetsNamesActivated = 0;
-	    this.totalDist = 0;
-	    this.firstX = null;
-	    this.firstY = null;
-	    this.measure = false;
-	    $("body").css("cursor", "");
-	};
-	
     vgapMap.prototype.drawMap = function() {
         if (!vgap.map.canvasRendered) {
-	        if (this.zoom < 20) {
+        	if (this.zoom < 20) {
 	        	vgap.map.drawNotes();
 	        	vgap.map.drawIonStorms();
 	        	vgap.map.drawMinefields();
@@ -41,46 +30,15 @@ function wrapper () { // draw.js
 	 
         vgap.map.canvasRendered = true;
     };
-    
-    vgapMap.prototype.highlight = function() {
-//    	if (this.hlight === undefined)
-//    		this.hlight = this.paper.set();
-//   		this.hlight.clear();	
-//        this.hlight.push(this.paper.circle(this.screenX(this.centerX), this.screenY(this.centerY), 20).attr({stroke: "#0099ff","stroke-width": "3","stroke-opacity": "1"}));
-    };
-    
-    vgapMap.prototype.centered = function() {
-//		if (this.hlight === undefined)
-//			this.hlight = this.paper.set();
-//		this.hlight.clear();	
-	    this.centering = false;
-	    if (vgap.map.onCenter) {
-	        vgap.map.onCenter();
-	        vgap.map.onCenter = null;
-	    }
-    };
-            
-    vgapMap.prototype.updateZoom = function() {
-        var a = 4000 * this.zoom;
-        this.resetBoundary(this.centerX, this.centerY);
-        this.createCanvasArray();
-        this.paperDiv.width(a);
-        this.paperDiv.height(a);
-        this.mapCover.width(a);
-        this.mapCover.height(a);
-        this.mapDiv.width(a);
-        this.mapDiv.height(a);
-        this.paper.setSize(a, a);
-        this.moveMap();
-        this.loc.html("<div class='ItemSelection_border'><div class='ItemSelectionBox minCorrection'>Zoom: " + this.zoom * 100 + "% </div></div>");
-    };
-    	
+        	
     vgapMap.prototype.drawPlanets = function() {
 		if (this.planets !== undefined)
 	        this.planets.remove();
         this.planets = this.paper.set();
 	            
-        if (vgap.nebulas) {
+    	this.drawZoomField();
+
+    	if (vgap.nebulas) {
         	for (var p = 0; p < vgap.nebulas.length; p++) {
                 var N = vgap.nebulas[p];
                 var x = this.screenX(N.x);
@@ -324,42 +282,24 @@ function wrapper () { // draw.js
         }
     };
     
-    var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+    vgapMap.prototype.drawZoomField = function() {
+    	if (this.zoom >= 20) {
+            var a = { fill:"#000000", stroke:"#333333", "stroke-width":1 };
+            
+            for (var T = (this.centerX - 3); T <= this.centerX + 3; T++) {
+                for (var U = (this.centerY - 3); U <= this.centerY + 3; U++) {
+                    if (this.getDist(T, U, this.centerX, this.centerY) <= 3) {
+                        var z = this.screenX(T);
+                        var A = this.screenY(U);
+                        var G = this.zoom / 2;
+                        this.planets.push(this.paper.rect(z - G, A - G, G * 2, G * 2).attr(a));
+                    }
+                }
+            }
+    	}
+
+    };
     
-	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.planets !== undefined)
-			vgap.map.planets.remove();
-		vgap.map.planets = vgap.map.paper.set();
-
-		if (vgap.map.starbases !== undefined)
-			vgap.map.starbases.remove();
-		vgap.map.starbases = vgap.map.paper.set();
-
-		if (vgap.map.ships !== undefined)
-			vgap.map.ships.remove();
-		vgap.map.ships = vgap.map.paper.set();
-
-		if (vgap.map.waypoints !== undefined)
-			vgap.map.waypoints.remove();
-		vgap.map.waypoints = vgap.map.paper.set();
-
-		if (vgap.map.explosions !== undefined)
-			vgap.map.explosions.remove();
-		vgap.map.explosions = vgap.map.paper.set();
-
-		if (vgap.map.ionstorms !== undefined)
-			vgap.map.ionstorms.remove();
-		vgap.map.ionstorms = vgap.map.paper.set();
-
-		if (vgap.map.minefields !== undefined)
-			vgap.map.minefields.remove();
-		vgap.map.minefields = vgap.map.paper.set();
-
-        vgap.map.canvasRendered = false;
-        
-        oldDeselectAll.apply(this, arguments);
-	};
-
 }
 	
 var script = document.createElement("script");

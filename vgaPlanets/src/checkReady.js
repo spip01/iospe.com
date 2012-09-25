@@ -7,7 +7,7 @@
 // @version 1.0
 // ==/UserScript==
 
-function wrapper () {
+function wrapper () { // checkready.js
 	
 	var oldLoadControls = vgapMap.prototype.loadControls; 
 	vgapMap.prototype.loadControls = function () {
@@ -72,9 +72,9 @@ function wrapper () {
 
 	vgapMap.prototype.checkReady = function () 
 	{
-		if (this.special !== undefined)
-	        this.special.remove();
-        this.special = this.paper.set();
+		if (this.explosions !== undefined)
+	        this.explosions.remove();
+        this.explosions = this.paper.set();
 	    
 		var a = { "text-anchor":"start", "fill":"white" };
 		
@@ -84,7 +84,7 @@ function wrapper () {
 				var b = { stroke: localStorage.planetNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(planet.x);
 	            var h = vgap.map.screenY(planet.y);
-				vgap.map.special.push(vgap.map.paper.circle(g, h, 10 * this.zoom).attr(b));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 10 * this.zoom).attr(b));
 //					this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "purple", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 
@@ -102,7 +102,7 @@ function wrapper () {
 				var c = { stroke: localStorage.starbaseNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(planet.x);
 	            var h = vgap.map.screenY(planet.y);
-				vgap.map.special.push(vgap.map.paper.circle(g, h, 15 * this.zoom).attr(c));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 15 * this.zoom).attr(c));
 //					this.drawCircle(planet.x, planet.y, 15 * this.zoom, { stroke: "blue", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 		}
@@ -113,7 +113,7 @@ function wrapper () {
 				var d = { stroke: localStorage.shipNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.special.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(d));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(d));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "green", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 
@@ -129,29 +129,22 @@ function wrapper () {
 				var e = { stroke: localStorage.hypWarning, "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.special.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(e));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(e));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
 			}
 		}
 
 	};
 
-//	var oldSetReadyCheckBox = vgaPlanets.prototype.setReadyCheckBox;
-//	vgaPlanets.prototype.setReadyCheckBox = function(d) {
-//		oldSetReadyCheckBox.apply(this, arguments);
-//		
-//		
-//	};
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
-//	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
-//	
-//	vgaPlanets.prototype.deselectAll = function() {
-//		if (vgap.map.special !== undefined)
-//			vgap.map.special.remove();
-//		vgap.map.special = vgap.map.paper.set();
-//
-//        oldDeselectAll.apply(this, arguments);
-//	};
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.explosions !== undefined)
+			vgap.map.explosions.remove();
+		vgap.map.explosions = vgap.map.paper.set();
+
+        oldDeselectAll.apply(this, arguments);
+	};
 
 };
 
