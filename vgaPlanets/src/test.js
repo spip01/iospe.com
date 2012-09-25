@@ -32,6 +32,8 @@ function wrapper () { // wrapper for injection
     	
 	vgapMap.prototype.setSmallComplete = function () 
 	{
+		var c = { "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
+		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
 			x = planet.x;
@@ -61,10 +63,14 @@ function wrapper () { // wrapper for injection
 						planet.readystatus = 1;
 				}
 				
+		        var g = vgap.map.screenX(x);
+		        var h = vgap.map.screenY(y);
+
 				if (planet.factories >= vgap.map.maxBuildings(planet, 100) && planet.defense >= vgap.map.maxBuildings(planet, 50) && planet.mines >= vgap.map.maxBuildings(planet, 200)) {
 					planet.readystatus = 1;
 					planet.changed = 1;
-					this.drawCircle(x, y, 35 * this.zoom, { stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+					c["stroke"] = "purple";
+					this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr(c));
 				}
 				
 				if (planet.clans < 5 || planet.supplies < 5 || planet.supplies + planet.megacredits < 20) {		// nothing to do here
@@ -72,8 +78,10 @@ function wrapper () { // wrapper for injection
 					planet.changed = 1;
 				}
 				
-				if (planet.readystatus > 0)
-					this.drawCircle(x, y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				if (planet.readystatus > 0) {
+					c["stroke"] = "orange";
+					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+				}
 			}
 		}
 
@@ -81,70 +89,78 @@ function wrapper () { // wrapper for injection
 			var ship = vgap.myships[i];
 			if (ship.readystatus == 0) {
 				
+		        var g = vgap.map.screenX(ship.x);
+		        var h = vgap.map.screenY(ship.y);
+
 				var shipFC = Number(ship.friendlycode);
 				if (isNaN(ship.friendlycode) || shipFC < 250) {	// generate new FC if the old FC was HYP or < 250 which could be a chunnel
 					var b = Math.random() * 750 + 250;
 					b = Math.floor(b);
 					ship.friendlycode = b.toString();
 					ship.changed = 1;
-					this.drawCircle(ship.x, ship.y, 10 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+					c["stroke"] = "red";
+					this.special.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
 				}
 				
 				var dist = vgap.map.getDist(ship.x, ship.y, ship.targetx, ship.targety);
-				if (ship.hullid == 51 && dist == 0 && ship.target.isPlanet) {		// borg probe, if the planet is unowned drop clans to caputure
-					var planet = ship.target;
-					if (planet.nativetype != 5) {
-						if (planet.ownerid == 0 && ship.clans != 0) {	// drop all if natives exist & set ship ready
-							if (planet.nativeclans != 0) {
-								ship.transferclans = ship.clans;
-								ship.clans = 0;
-								ship.readystatus = 1;
-							}
-							else {										// just 1 if planet is empty	
-								ship.transferclans = 1;
-								ship.clans -= 1;
-								if (ship.supplies >= 1) {
-									ship.transfersupplies = 1;
-									ship.supplies -= 1;
-								}
-							}
-							
-							this.drawCircle(ship.x, ship.y, 16 * this.zoom, { stroke: "blue", "stroke-width": 8 * this.zoom, "stroke-opacity": 1 });
-						}
-						
-						if (planet.ownerid == vgap.player.id && planet.factories == 0 && ship.supplies > 0 && ship.megacredits > 0) {
-							planet.supplies += ship.supplies;
-							ship.transfersupplies = ship.supplies;
-							ship.supplies = 0;
-							planet.megacredits += ship.megacredits;
-							ship.transfermegacredits = ship.megacredits;
-							ship.megacredits = 0;
-							planet.changed = 1;
-						}
-						
-						if (ship.transferclans > 0 || ship.transfersupplies > 0 || ship.transfermegacredits > 0) {
-							ship.transfertargettype = 1;
-							ship.transfertargetid = planet.id;
-							ship.changed = 1;
-							var built = vgap.map.buildFactories(planet, 15);
-							
-							if (built > 0) {
-								ship.readystatus = 1;
-								planet.readystatus = 1;
-								planet.changed = 1;
-								this.drawCircle(ship.x, ship.y, 24 * this.zoom, { stroke: "cyan", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-							}
-						}
-					}
-				}
+//				if (ship.hullid == 51 && dist == 0 && ship.target.isPlanet) {		// borg probe, if the planet is unowned drop clans to caputure
+//					var planet = ship.target;
+//					if (planet.nativetype != 5) {
+//						if (planet.ownerid == 0 && ship.clans != 0) {	// drop all if natives exist & set ship ready
+//							if (planet.nativeclans != 0) {
+//								ship.transferclans = ship.clans;
+//								ship.clans = 0;
+//								ship.readystatus = 1;
+//							}
+//							else {										// just 1 if planet is empty	
+//								ship.transferclans = 1;
+//								ship.clans -= 1;
+//								if (ship.supplies >= 1) {
+//									ship.transfersupplies = 1;
+//									ship.supplies -= 1;
+//								}
+//							}
+//							
+//							c["stroke"] = "blue";
+//							this.special.push(this.paper.circle(g, h, 16 * this.zoom).attr(c));
+//						}
+//						
+//						if (planet.ownerid == vgap.player.id && planet.factories == 0 && ship.supplies > 0 && ship.megacredits > 0) {
+//							planet.supplies += ship.supplies;
+//							ship.transfersupplies = ship.supplies;
+//							ship.supplies = 0;
+//							planet.megacredits += ship.megacredits;
+//							ship.transfermegacredits = ship.megacredits;
+//							ship.megacredits = 0;
+//							planet.changed = 1;
+//						}
+//						
+//						if (ship.transferclans > 0 || ship.transfersupplies > 0 || ship.transfermegacredits > 0) {
+//							ship.transfertargettype = 1;
+//							ship.transfertargetid = planet.id;
+//							ship.changed = 1;
+//							var built = vgap.map.buildFactories(planet, 15);
+//							
+//							if (built > 0) {
+//								ship.readystatus = 1;
+//								planet.readystatus = 1;
+//								planet.changed = 1;
+//								c["stroke"] = "cyan";
+//								this.special.push(this.paper.circle(g, h, 24 * this.zoom).attr(c));
+//							}
+//						}
+//					}
+//				}
 				
 				if (ship.target && ship.target.isPlanet && dist > 0 && dist <= ship.warp * ship.warp + 3) {	// 1 turn away target set
 					ship.readystatus = 1;
 					ship.changed = 1;
 				}
 				
-				if (ship.readystatus > 0)
-					this.drawCircle(x, y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				if (ship.readystatus > 0) {
+					c["stroke"] = "orange";
+					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+				}
 			}
 		}
 		
@@ -157,11 +173,12 @@ function wrapper () { // wrapper for injection
 		var happychange;
 		var happypoints;
 		var taxrate;
+		var c = { "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
 		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
-			var x = planet.x;
-			var y = planet.y;
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
 			
 			if (planet.nativeclans != 0) {
 				happychange = planet.nativehappychange;
@@ -188,7 +205,8 @@ function wrapper () { // wrapper for injection
 				if (taxrate != planet.nativetaxrate) {
 					planet.nativehappychange = happychange;
 					planet.changed = 1;
-					this.drawCircle(x, y, 20 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+					c["stroke"] = "yellow";
+					this.special.push(this.paper.circle(g, h, 20 * this.zoom).attr(c));
 				}
 			}
 	
@@ -216,7 +234,8 @@ function wrapper () { // wrapper for injection
 			if (taxrate != planet.colonisttaxrate) {
 				planet.colhappychange = happychange;
 				planet.changed = 1;
-				this.drawCircle(x, y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				c["stroke"] = "orange";
+				this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 			}
 		}
 		
@@ -388,15 +407,26 @@ function wrapper () { // wrapper for injection
 	{
 		for (var i=0; i < vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
+			var c = { "stroke-width": 2, "stroke-opacity": 1 };
 			
-			if (planet.neutronium > 400)
-				this.drawCircle(planet.x, planet.y, (26 + Math.sqrt(planet.neutronium - 400)) * this.zoom, { stroke: "red", "stroke-width": 2, "stroke-opacity": 1 });
-			if (planet.tritanium > 400)
-				this.drawCircle(planet.x, planet.y, (26 + Math.sqrt(planet.tritanium - 400)) * this.zoom, { stroke: "orange", "stroke-width": 2, "stroke-opacity": 1 });
-			if (planet.duranium > 400)
-				this.drawCircle(planet.x, planet.y, (26 + Math.sqrt(planet.duranium - 400)) * this.zoom, { stroke: "yellow", "stroke-width": 2, "stroke-opacity": 1 });
-			if (planet.molybdenum > 400)
-				this.drawCircle(planet.x, planet.y, (26 + Math.sqrt(planet.molybdenum - 400)) * this.zoom, { stroke: "beige", "stroke-width": 2, "stroke-opacity": 1 });
+			if (planet.neutronium > 400) {
+				c["stroke"] = "red";
+				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.neutronium - 400)) * this.zoom).attr(c));
+			}
+			if (planet.tritanium > 400) {
+				c["stroke"] = "orange";
+				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.tritanium - 400)) * this.zoom).attr(c));
+			}
+			if (planet.duranium > 400) {
+				c["stroke"] = "yellow";
+				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.duranium - 400)) * this.zoom).attr(c));
+			}
+			if (planet.molybdenum > 400) {
+				c["stroke"] = "beige";
+				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.molybdenum - 400)) * this.zoom).attr(c));
+			}
 		}
 	};
 
@@ -405,10 +435,15 @@ function wrapper () { // wrapper for injection
 		for (var i=0; i<vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
 			var rad  = 10;
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
+			var c = { "stroke-width": 2, "stroke-opacity": 1 };
 			
 			if (planet.megacredits + planet.supplies > 1000) {
-				this.drawCircle(planet.x, planet.y, (rad + Math.sqrt(planet.megacredits)) * this.zoom, { stroke: "blue", "stroke-width": 2, "stroke-opacity": 1 });
-				this.drawCircle(planet.x, planet.y, (rad + Math.sqrt(planet.supplies)) * this.zoom, { stroke: "purple", "stroke-width": 2, "stroke-opacity": 1 });
+				c["stroke"] = "blue";
+				this.special.push(this.paper.circle(g, h, (rad + Math.sqrt(planet.megacredits)) * this.zoom).attr(c));
+				c["stroke"] = "purple";
+				this.special.push(this.paper.circle(g, h, (rad + Math.sqrt(planet.supplies)) * this.zoom).attr(c));
 			}
 		}
 	};
@@ -417,14 +452,14 @@ function wrapper () { // wrapper for injection
 	{
 		for (var i=0; i<vgap.myplanets.length; ++i) {
 			var planet = vgap.myplanets[i];
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
+			var c = { "stroke-width": 2, "stroke-opacity": 1 };
 
-			if (planet.defense > 20) 
-				this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "green", "stroke-width": Math.log(planet.defense), "stroke-opacity": 1 });
-			
-			var rad = 10 + Math.log(planet.defense);
-
-			this.drawCircle(planet.x, planet.y, (rad + Math.log(planet.clans)) * this.zoom, { stroke: "red", "stroke-width": 2, "stroke-opacity": 1 });
-			this.drawCircle(planet.x, planet.y, (rad + Math.log(planet.nativeclans)) * this.zoom, { stroke: "orange", "stroke-width": 2, "stroke-opacity": 1 });
+			c["stroke"] = "red";
+			this.special.push(this.paper.circle(g, h, (10 + Math.log(planet.clans)) * this.zoom).attr(c));
+			c["stroke"] = "orange";
+			this.special.push(this.paper.circle(g, h, (10 + Math.log(planet.nativeclans)) * this.zoom).attr(c));
 		}
 	};
 
@@ -456,25 +491,33 @@ function wrapper () { // wrapper for injection
 
 	vgapMap.prototype.randomizeFC = function()	// random meaningless FC
 	{
+		var c = { "stroke-width": 2, "stroke-opacity": 1 };
+		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
 			if (planet.readystatus == 0) {
+		        var g = vgap.map.screenX(planet.x);
+		        var h = vgap.map.screenY(planet.y);
 				var b = Math.random() * 750 + 250;
 				b = Math.floor(b);
 				planet.friendlycode = b.toString();
 				planet.changed = 1;
-				this.drawCircle(planet.x, planet.y, 10 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				c["stroke"] = "red";
+				this.special.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
 			}
 		}
 		
 		for (var i = 0; i < vgap.myships.length; i++) {
 			var ship = vgap.myships[i];
 			if (ship.readystatus == 0) {
+		        var g = vgap.map.screenX(ship.x);
+		        var h = vgap.map.screenY(ship.y);
 				var b = Math.random() * 750 + 250;
 				b = Math.floor(b);
 				ship.friendlycode = b.toString();
 				ship.changed = 1;
-				this.drawCircle(ship.x, ship.y, 15 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				c["stroke"] = "orange";
+				this.special.push(this.paper.circle(g, h, 13 * this.zoom).attr(c));
 			}
 		}
 		
@@ -517,6 +560,7 @@ function wrapper () { // wrapper for injection
 				    vgap.saveInProgress = 2;
 				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
 					keycount = 10;
+					delete b;
 					b = vgap.map.newDataObject();
 				}
 			}
@@ -526,7 +570,6 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
 	{
 	    var b = vgap.map.newDataObject();
-        
         var keycount = 10;
         
 		for (var i = 0; i < vgap.myships.length; i++) {
@@ -539,8 +582,10 @@ function wrapper () { // wrapper for injection
 				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
 			        b.add("keycount", keycount);
 				    vgap.saveInProgress = 2;
+				    console.log(b);
 				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
 					keycount = 10;
+					delete b;
 					b = vgap.map.newDataObject();
 				}
 			}
@@ -614,16 +659,17 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.buildFactories = function (planet, count)
 	{
 		var build = 0;
-		var x = planet.x;
-		var y = planet.y;
+		
 		if (planet.factories < count) {	
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 100);
 			build = Math.min(count - planet.factories, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 4), 
 					max - planet.factories);			// maximum number of factories we can build
 
 			if (build > 0) {
-				this.drawCircle(x, y, 25 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr({ stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtfactories += build;
 				planet.factories += build;
@@ -640,16 +686,16 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.buildDefense = function (planet, count)
 	{
 		var build = 0;
-		var x = planet.x;
-		var y = planet.y;
 		if (planet.defense < count) {	            
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 50);
 			build = Math.min(count - planet.defense, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 11), 
 					max - planet.defense);			// maximum number we can build
 
 			if (build > 0) {
-				this.drawCircle(x, y, 30 * this.zoom, { stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				this.special.push(this.paper.circle(g, h, 30 * this.zoom).attr({ stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtdefense += build;
 				planet.defense += build;
@@ -665,16 +711,16 @@ function wrapper () { // wrapper for injection
 	vgapMap.prototype.buildMines = function (planet, count)
 	{
 		var build = 0;
-		var x = planet.x;
-		var y = planet.y;
 		if (planet.mines < count) {	
+	        var g = vgap.map.screenX(planet.x);
+	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 200);
 			build = Math.min(count - planet.mines, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 5), 
 					max - planet.mines);				// maximum number of factories we can build
 
 			if (build > 0) {
-				this.drawCircle(x, y, 35 * this.zoom, { stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+				this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr({ stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtmines += build;
 				planet.mines += build;
@@ -694,11 +740,8 @@ function wrapper () { // wrapper for injection
 			switch (note.targettype) {
 			case 1: // planet
 				var planet = vgap.getPlanet(note.targetid);
-//				this.drawCircle(planet.x, planet.y, 15 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
 				
 				if (planet && planet.ownerid == vgap.player.id ) {
-					x = planet.x;
-					y = planet.y;
 					var built = 0;
 					var body = note.body;
 					body = body.toString();
@@ -711,24 +754,20 @@ function wrapper () { // wrapper for injection
 						var build = ex.match(/\d+/);
 						build = Number(build);
 
-						if (ex.match(/factories:/i) && planet.defense >= 20) {	// build factories based on planet notes "factories:xxx"
+						if (ex.match(/factories:/i) && planet.defense >= 20) 	// build factories based on planet notes "factories:xxx"
 							built += vgap.map.buildFactories(planet, build);
-//							if (planet.factories >= build)						// i want to delete completed builds but it isn't working
-//								body.replace(ex, "");							// doesn't really matter since they wouldn't do anything anyway
-						}
-						if (ex.match(/mines:/i) && planet.defense >= 20) {		// build mines based on planet notes "mines:xxx"
+
+						if (ex.match(/mines:/i) && planet.defense >= 20) 		// build mines based on planet notes "mines:xxx"
 							built += vgap.map.buildMines(planet, build);
-//							if (planet.mines >= build)
-//								body.replace(ex, "");
-						}
-						if (ex.match(/defense:/i)) {							// build defense based on planet notes "defense:xxx"
+
+						if (ex.match(/defense:/i)) 							// build defense based on planet notes "defense:xxx"
 							built += vgap.map.buildDefense(planet, build);	
-//							if (planet.defense >= build)
-//								body.replace(ex, "");
-						}
+
 						if (ex.match(/done:/i)) {								// no more building so just set ready
+					        var g = vgap.map.screenX(planet.x);
+					        var h = vgap.map.screenY(planet.y);
 							++built;
-							this.drawCircle(planet.x, planet.y, 15 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+							this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 						}
 					}
 					
@@ -740,36 +779,36 @@ function wrapper () { // wrapper for injection
 				}
 				break;
 				
-				case 2: // ship
-				var ship = vgap.getShip(note.targetid);
-				if (ship && ship.ownerid == vgap.player.id ) {
-					var x = ship.x;
-					var y = ship.y;
-					this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-					var found;
-					if (found = note.body.match(/hyp:\d+/i)) {		// automatically HYP to next planet based on notes  "HYP:xxx"
-						found = found.toString();
-						var id = found.match(/\d+/);
-						id = Number(id);
-						var planet = vgap.planets[id-1];
-						ship.targetx = planet.x;
-						ship.targety = planet.y;
-						ship.target = planet;
-						this.drawLine(ship.x, ship.y, ship.targetx, ship.targety, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-						ship.friendlycode = "HYP";
-						ship.mission = 10;
-						ship.redystatus = 1;
-						ship.changed = 1;
-					}
-				}
-				break;
+//				case 2: // ship
+//				var ship = vgap.getShip(note.targetid);
+//				if (ship && ship.ownerid == vgap.player.id ) {
+//					var x = ship.x;
+//					var y = ship.y;
+//					this.special.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//					var found;
+//					if (found = note.body.match(/hyp:\d+/i)) {		// automatically HYP to next planet based on notes  "HYP:xxx"
+//						found = found.toString();
+//						var id = found.match(/\d+/);
+//						id = Number(id);
+//						var planet = vgap.planets[id-1];
+//						ship.targetx = planet.x;
+//						ship.targety = planet.y;
+//						ship.target = planet;
+//						//this.special.push(this.drawLine(ship.x, ship.y, ship.targetx, ship.targety, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//						ship.friendlycode = "HYP";
+//						ship.mission = 10;
+//						ship.redystatus = 1;
+//						ship.changed = 1;
+//					}
+//				}
+//				break;
 				
 //				case 3: // starbase
 //				var object = vgap.getStarbase(note.targetid);
 //				if (object && object.ownerid == vgap.player.id ) {
 //				var x = object.x;
 //				var y = object.y;
-//				this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
+//				//this.special.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 //				}
 //				break;
 
@@ -779,17 +818,29 @@ function wrapper () { // wrapper for injection
 		}
 	};
 
-	vgapMap.prototype.resetCompleted = function () 
-	{
-		for (var i = 0; i < vgap.myplanets.length; i++) {
-			var planet = vgap.myplanets[i];
-			if (planet.readystatus && planet.clans == 2) {
-				planet.readystatus = 0;
-				planet.changed = 1;
-				this.drawCircle(planet.x, planet.y, 11 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
-			}
-		}
+//	vgapMap.prototype.resetCompleted = function () 
+//	{
+//		for (var i = 0; i < vgap.myplanets.length; i++) {
+//			var planet = vgap.myplanets[i];
+//			if (planet.readystatus && planet.clans == 2) {
+//				planet.readystatus = 0;
+//				planet.changed = 1;
+//				//this.special.push(this.drawCircle(planet.x, planet.y, 11 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//			}
+//		}
+//	};
+	
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.special !== undefined)
+			vgap.map.special.remove();
+		vgap.map.special = vgap.map.paper.set();
+
+        oldDeselectAll.apply(this, arguments);
 	};
+
+
 }
 	
 var script = document.createElement("script");

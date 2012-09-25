@@ -93,6 +93,7 @@ function wrapper () {	// notesDisplay.js
 	vgaPlanets.prototype.deselectAll = function() {
 		if (vgap.map.notes !== undefined)
 			vgap.map.notes.remove();
+		vgap.map.notes = vgap.map.paper.set();
 
         oldDeselectAll.apply(this, arguments);
 	};

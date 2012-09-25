@@ -24,9 +24,9 @@ function wrapper () { // chunnelArrows.js
         var height = this.controls.height() - this.toolsMenu.height();
         this.controls.css("marginTop", "-" + this.controls.height() + "px");
         
-    	vgap.map.zoom = zoomTable[localStorage.startZoom] / 100;
-	    vgap.map.centerX = Number(localStorage.startX);
-    	vgap.map.centerY = Number(localStorage.startY);
+    	vgap.map.zoom = zoomTable[localStorage[vgap.gameId+".startZoom"]] / 100;
+	    vgap.map.centerX = Number(localStorage[vgap.gameId+".startX"]);
+    	vgap.map.centerY = Number(localStorage[vgap.gameId+".startY"]);
     };
 
     vgapMap.prototype.getColors = function(player) {
@@ -43,9 +43,9 @@ function wrapper () { // chunnelArrows.js
 	    		localStorage.filterZoom = "true";
 	    		localStorage.waypointChunnel = "true";
 	    		localStorage.waypointHYP = "true";
-	    		localStorage.startZoom = "1";
-	    		localStorage.startX = "2000";
-	    		localStorage.startY = "2000";
+	    		localStorage[vgap.gameId+".startZoom"] = "1";
+	    		localStorage[vgap.gameId+".startX"] = "2000";
+	    		localStorage[vgap.gameId+".startY"] = "2000";
 	    		localStorage.shipHistoryLength = "3";
 	    		localStorage.warpCircle = "true";
 	    	}
@@ -74,10 +74,10 @@ function wrapper () { // chunnelArrows.js
 		b += "<tr><td colspan=3><input id='filterZoom' type='checkbox'" + (localStorage.filterZoom == "true" ? "checked='true'" : "") + "/>";
 		b += 	" Zoom to destination of selected ship when zoomed to the max and only show selected ship</td></tr>";
 		
-		b += "<tr><td><input id='startX' type='number' vs='vs' value=" + localStorage.startX + " max=4000'/> Starting X</td>";
-		b +=     "<td><input id='startY' type='number' vs='vs' value=" + localStorage.startY + " max=4000'/> Starting Y</td>";
-		b += "<td>&nbsp;&nbsp;<input id='startZoom' type='range' vs='vs' value=" + localStorage.startZoom + " min=0 max=13 onchange='vgap.dash.updateZoom()'/>";
-		b +=    "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[localStorage.startZoom] + "&#37 Starting Zoom</div></td></tr>";
+		b += "<tr><td><input id='"+vgap.gameId+".startX' type='number' vs='vs' value=" + localStorage[vgap.gameId+".startX"] + " max=4000'/> Starting X</td>";
+		b +=     "<td><input id='"+vgap.gameId+".startY' type='number' vs='vs' value=" + localStorage[vgap.gameId+".startY"] + " max=4000'/> Starting Y</td>";
+		b += "<td>&nbsp;&nbsp;<input id='"+vgap.gameId+".startZoom' type='range' vs='vs' value=" + localStorage[vgap.gameId+".startZoom"] + " min=0 max=13 onchange='vgap.dash.updateZoom()'/>";
+		b +=    "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[localStorage[vgap.gameId+".startZoom"]] + "&#37 Starting Zoom</div></td></tr>";
 		b += "</table></div>";
    
 		$('[onclick="vgap.resetTurn();"]').after(b);
@@ -93,7 +93,7 @@ function wrapper () { // chunnelArrows.js
 	};
 	
 	vgapDashboard.prototype.updateZoom = function() {
-		var val = $("#waypointOptions #startZoom").val();
+		var val = $("#waypointOptions #"+vgap.gameId+".startZoom").val();
 		var b = "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[val] + "&#37 Starting Zoom</div>";
 		$("#zoom").replaceWith(b);
 	};
@@ -112,13 +112,13 @@ function wrapper () { // chunnelArrows.js
 		var b = "<div id='shipHistory'>&nbsp;&nbsp;&nbsp;" + localStorage.shipHistoryLength + " Ship History</div>";
 		$("#shipHistory").replaceWith(b);
 	    
-    	vgap.map.zoom = zoomTable[localStorage.startZoom] / 100;
+    	vgap.map.zoom = zoomTable[localStorage[vgap.gameId+".startZoom"]] / 100;
 
-		b = "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[localStorage.startZoom] + "&#37 Starting Zoom</div>";
+		b = "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[localStorage[vgap.gameId+".startZoom"]] + "&#37 Starting Zoom</div>";
 		$("#zoom").replaceWith(b);
 	    
-	    vgap.map.centerX = Number(localStorage.startX);
-    	vgap.map.centerY = Number(localStorage.startY);
+	    vgap.map.centerX = Number(localStorage[vgap.gameId+".startX"]);
+    	vgap.map.centerY = Number(localStorage[vgap.gameId+".startY"]);
     	
 		oldSaveSettings.apply(this,arguments);
 	};
@@ -213,7 +213,7 @@ function wrapper () { // chunnelArrows.js
 		var fromx = ship.x;
 		var fromy = ship.y;
 
-		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33 };
+		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33, fill:c.start, "fill-opacity":.1 };
 		
 		if (localStorage.warpCircle)
 			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(d));
@@ -225,6 +225,9 @@ function wrapper () { // chunnelArrows.js
 			fromx = ship.history[j].x;
 			fromy = ship.history[j].y;
 			
+			if (ship.hullid == 54 && vgap.getNebulaIntensity(tox, toy) > 0) 
+				vgap.map.special.push(vgap.map.paper.circle(this.screenX(tox), this.screenY(toy), 100 * this.zoom).attr(d));
+			
 			vgap.map.special.push(vgap.map.paper.path("M"+ this.screenX(fromx) +"," + this.screenY(fromy) + "L"+ this.screenX(tox) +"," + this.screenY(toy)).attr(d));
 		}
 	}; 
@@ -234,9 +237,11 @@ function wrapper () { // chunnelArrows.js
 	vgaPlanets.prototype.deselectAll = function() {
 		if (vgap.map.waypoints !== undefined)
 			vgap.map.waypoints.remove();
+		vgap.map.waypoints = vgap.map.paper.set();
 
 		if (vgap.map.special !== undefined)
 			vgap.map.special.remove();
+		vgap.map.special = vgap.map.paper.set();
 
         oldDeselectAll.apply(this, arguments);
 	};

@@ -143,14 +143,15 @@ function wrapper () {
 //		
 //	};
 	
-	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
-	
-	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.special !== undefined)
-			vgap.map.special.remove();
-
-        oldDeselectAll.apply(this, arguments);
-	};
+//	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+//	
+//	vgaPlanets.prototype.deselectAll = function() {
+//		if (vgap.map.special !== undefined)
+//			vgap.map.special.remove();
+//		vgap.map.special = vgap.map.paper.set();
+//
+//        oldDeselectAll.apply(this, arguments);
+//	};
 
 };
 

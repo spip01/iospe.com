@@ -57,26 +57,52 @@ function wrapper () {	// hyperJump.js
 
 	vgapMap.prototype.hyperjump = function(x, y)		// replaces vgap map hyperjump function
 	{
+		var a = { "stroke-width": 2, "stroke-opacity": .5 };
 		if (localStorage.hyperjumpPlanets == "true")
 			for (var i=0; i<vgap.planets.length; ++i) {
 				var planet = vgap.planets[i];
 				var dist = vgap.map.getDist(x, y, planet.x, planet.y);
-				if (dist >= 340 && dist <= 360)
-					this.drawCircle(planet.x, planet.y, 12 * this.zoom, { stroke: localStorage.ringColor, "stroke-width": 2, "stroke-opacity": .5 });	// I wanted the target planets circled
-				else if (dist >= 338 && dist <= 362)
-					this.drawCircle(planet.x, planet.y, 12 * this.zoom, { stroke: "yellow", "stroke-width": 2, "stroke-opacity": .5 });	// I wanted the target planets circled
+				
+	            var g = vgap.map.screenX(planet.x);
+	            var h = vgap.map.screenY(planet.y);
+
+				if (dist >= 340 && dist <= 360) {
+					a["stroke"] = localStorage.ringColor;
+					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
+				}	
+				else if (dist >= 338 && dist <= 362) {
+					a["stroke"] = "yellow";
+					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(a));	// I wanted the target planets circled
+				}
 			}
 		
-		var a = { stroke: localStorage.ringColor, "stroke-width": 2, "stroke-opacity": .5 };
+        var g = vgap.map.screenX(x);
+        var h = vgap.map.screenY(y);
+		a["stroke"] = localStorage.ringColor;
+
 		if (localStorage.hyperjumpRing == "true") {
-			this.drawCircle(x, y, 340 * this.zoom, a);
-			this.drawCircle(x, y, 360 * this.zoom, a);
+			this.special.push(this.paper.circle(g, h, 340 * this.zoom).attr(a));
+			this.special.push(this.paper.circle(g, h, 360 * this.zoom).attr(a));
 		}
 		else {
-			this.drawCircle(x, y, 350 * this.zoom, { stroke: localStorage.ringColor, "stroke-width": 20 * this.zoom, "stroke-opacity": .25 });
-			this.drawCircle(x, y, 350 * this.zoom, a);
+			this.special.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
+			a["stroke-width"] = 20;
+			a["stroke-opacity"] = .25;
+			this.special.push(this.paper.circle(g, h, 350 * this.zoom).attr(a));
 		}
 	};
+	
+	
+	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
+	
+	vgaPlanets.prototype.deselectAll = function() {
+		if (vgap.map.special !== undefined)
+			vgap.map.special.remove();
+		vgap.map.special = vgap.map.paper.set();
+
+        oldDeselectAll.apply(this, arguments);
+	};
+
 
 };
 
