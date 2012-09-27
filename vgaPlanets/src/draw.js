@@ -130,10 +130,10 @@ function wrapper () { // draw.js
 	   	for (var i=0; i<vgap.starbases.length; ++i) {
     		var starbase = vgap.starbases[i];
     		var planet = vgap.planets[starbase.planetid-1];
+			var h = this.screenX(planet.x + g);
 			var i = this.screenX(planet.x - g);
 			var y = this.screenY(planet.y);
 			if (this.zoom < 1) {
-				var h = this.screenX(planet.x + g);
                 var el = this.paper.path("M" + h + "," + y + "L" + i + "," + y).attr(a);
                 this.starbases.push(el.transform("r90"));
                 this.starbases.push(this.paper.path("M" + h + "," + y + "L" + i + "," + y).attr(a));
@@ -157,14 +157,13 @@ function wrapper () { // draw.js
 			var x = this.screenX(ship.x - G / 2);
 			var y = this.screenY(ship.y - G / 2);
 			
-    		var t = "t"+G+",0";
     		var l = vgap.shipMap[ship.x+","+ship.y];
     		
 			for (var k=0; k<l.length; ++k) {
 			    var s = l[k];
 			    var c = this.getColors(s.ownerid);
     			var r = vgap.map.paper.rect(x, y, G, G).attr({fill:c.start});
-    			this.ships.push(r.transform("r"+k*45+t));
+    			this.ships.push(r.transform("r"+k*45+"t"+G+",0"));
 			}
     	}
     };
@@ -296,8 +295,7 @@ function wrapper () { // draw.js
                         var G = this.zoom / 2;
                         var z = this.screenX(T - G);
                         var A = this.screenY(U - G);
-                        G *= 2;
-                        this.planets.push(this.paper.rect(a, A, G, G).attr(a));
+                        this.planets.push(this.paper.rect(z, A, G * 2, G * 2).attr(a));
                     }
                 }
             }
