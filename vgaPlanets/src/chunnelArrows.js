@@ -112,11 +112,12 @@ function wrapper () { // chunnelArrows.js
 		var b = "<div id='shipHistory'>&nbsp;&nbsp;&nbsp;" + localStorage.shipHistoryLength + " Ship History</div>";
 		$("#shipHistory").replaceWith(b);
 	    
-    	vgap.map.zoom = zoomTable[localStorage[vgap.gameId+".startZoom"]] / 100;
+    	vgap.map.zoom = zoomTable[localStorage[vgap.gameId+".startZoom"]];
 
-		b = "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + zoomTable[localStorage[vgap.gameId+".startZoom"]] + "&#37 Starting Zoom</div>";
+		b = "<div id='zoom'>&nbsp;&nbsp;&nbsp;" + vgap.map.zoom + "&#37 Starting Zoom</div>";
 		$("#zoom").replaceWith(b);
 	    
+		vgap.map.zoom /= 100;
 	    vgap.map.centerX = Number(localStorage[vgap.gameId+".startX"]);
     	vgap.map.centerY = Number(localStorage[vgap.gameId+".startY"]);
     	
@@ -164,14 +165,14 @@ function wrapper () { // chunnelArrows.js
 	            	var m = Number(ship.friendlycode);
 	                var to = vgap.getShip(m);
                 	d["stroke-dasharray"] = "-";
-                	if (localStorage.waypointChunnel== true)
+                	if (localStorage.waypointChunnel== "true")
                 		d["arrow-end"] = "classic-wide-long";
 	                this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(to.x) + " " + this.screenY(to.y)).attr(d));
 				}
 				else {
 					if (vgap.isHyping(ship)) {
 	                	d["stroke-dasharray"] = ".";
-	                	if (localStorage.waypointHYP== true)
+	                	if (localStorage.waypointHYP== "true")
 	                		d["arrow-end"] = "classic-wide-long";
 					}
 					this.waypoints.push(this.paper.path("M" + x + " " + y + "L" + this.screenX(ship.targetx) + " " + this.screenY(ship.targety)).attr(d));
@@ -193,7 +194,28 @@ function wrapper () { // chunnelArrows.js
 	}
   };
 	
-    var oldSelectShip = vgapMap.prototype.selectShip;
+  vgaPlanets.prototype.isChunnelling = function(c) {
+      if ((c.hullid == 56 || c.hullid == 1055) && c.warp == 0 && c.neutronium >= 50 && c.mission != 6) {
+          if (this.isTowTarget(c.id) == null) {
+              var b = /\d{3}/;
+              var a = c.friendlycode;
+              a = a.toString();
+              if ((a.match(b)) && (a != "")) {
+                  var e = parseInt(c.friendlycode, 10);
+                  var d = vgap.getShip(e);
+                  if (d != null) {
+                      if (d.ownerid == c.ownerid && d.warp == 0 && d.neutronium >= 1 && d.mission != 6 && vgap.map.getDist(c.x, c.y, d.x, d.y) >= 100 && this.isTowTarget(d.id) == null) {
+                    	  if (d.hullid == 56 || d.hullid == 1054 || c.hullid == 1055 && d.hullid == 51)
+                    	  	return true;
+                      }
+                  }
+              }
+          }
+      }
+      return false;
+  };
+  
+  var oldSelectShip = vgapMap.prototype.selectShip;
 	vgapMap.prototype.selectShip = function(a) {
 		oldSelectShip.apply(this, arguments);
 
@@ -216,7 +238,7 @@ function wrapper () { // chunnelArrows.js
 		var d = { stroke:c.start, "stroke-width":1, "stroke-opacity":.33 };
 		var e = { "stroke-opacity":0, fill:c.start, "fill-opacity":.075 };
 		
-		if (localStorage.warpCircle)
+		if (localStorage.warpCircle == "true")
 			vgap.map.special.push(vgap.map.paper.circle(this.screenX(fromx), this.screenY(fromy), ship.engineid * ship.engineid * this.zoom).attr(d));
 		
 		for (var j = 0; j < localStorage.shipHistoryLength && j < ship.history.length; j++) {
