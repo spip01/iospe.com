@@ -557,7 +557,11 @@ function wrapper () { // test.js
 				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
 			        b.add("keycount", keycount);
 				    vgap.saveInProgress = 2;
-				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+				    vgap.request("/game/save", b, function(f) { 
+				    	if (f.success)
+				    		planet.changed = 0;
+				    	vgap.saveInProgress = 0;
+				    });
 					keycount = 10;
 					b.reset();
 				}
@@ -582,7 +586,11 @@ function wrapper () { // test.js
 			        b.add("keycount", keycount);
 				    vgap.saveInProgress = 2;
 				    console.log(b);
-				    vgap.request("/game/save", b, function(f) { vgap.processSave(f); });
+				    vgap.request("/game/save", b, function(f) { 
+				    	if (f.success)
+				    		ship.changed = 0;
+				    	vgap.saveInProgress = 0;
+				    });
 					keycount = 10;
 					b.reset();
 				}

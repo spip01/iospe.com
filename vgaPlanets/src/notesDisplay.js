@@ -78,9 +78,9 @@ function wrapper () {	// notesDisplay.js
 		        if (d.targettype == 1 && d.body.length > 0) {
 		            var e = vgap.getPlanet(d.targetid);
 		            var b = 7;
-		            var g = vgap.map.screenX(e.x) - (b * this.zoom);
-		            var h = vgap.map.screenY(e.y) - (b * this.zoom);
-		            var f = (b + b) * this.zoom;
+		            var g = vgap.map.screenX(e.x - b * this.zoom);
+		            var h = vgap.map.screenY(e.y - b * this.zoom);
+		            var f = (b + b) * this.zoomz
 		            var a = {stroke: localStorage.noteColor, "stroke-width": "1","stroke-opacity": 0.5};
 		            vgap.map.notes.push(vgap.map.paper.rect(g, h, f, f).attr(a));
 		        }
