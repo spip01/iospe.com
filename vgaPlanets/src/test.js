@@ -204,10 +204,14 @@ function wrapper () { // test.js
 	    var txt = "";
 	    if (hit.isPlanet) { //planet
 	        txt += "<div class='ItemSelectionBox minCorrection'>";
-	        txt += "<span>" + hit.id + ": " + hit.name;
+	    	txt += "<span>";
+	        if (hit.ownerid == vgap.player.id && hit.readystatus > 0)
+		        txt += "<span class='GoodText'>";
+		    else
+		    	txt += "<span>";
+	        txt += hit.id + ": " + hit.name + "</span>";
 	        if (hit.temp != -1)
-	            txt += "<span style='float:right;'>Temp: " + hit.temp + "</span>";
-	        txt += "</span>";
+	            txt += "<span style='float:right;'>Temp: " + hit.temp + "</span></span>";
 	        txt += "<table class='CleanTable'>";
 	        if (hit.infoturn == 0) {
 	            //unknown planet
@@ -251,8 +255,13 @@ function wrapper () { // test.js
 	        var hull = vgap.getHull(ship.hullid);
 //	        var totalCargo = ship.ammo + ship.duranium + ship.tritanium + ship.molybdenum + ship.supplies + ship.clans;
 	        var html = "<div class='ItemSelectionBox minCorrection'>";
+	        html += "<span>";
 	        if (ship.ownerid == vgap.player.id || vgap.fullallied(ship.ownerid)) {
-	            html += "<span>" + ship.id + ": " + hull.name;
+	        	if (ship.readystatus > 0)
+	        		html += "<span class='GoodText'>";
+	        	else
+	        		html += "<span>";
+	        	html += ship.id + ": " + hull.name + "</span>";
 	            html += "<span style='float:right;'>FC: " + ship.friendlycode + "</span></span>";
 	            html += "<table class='CleanTable'>";
 	            html += "<tr><td colspan='2'>\= " + ship.x + " : " + ship.y + "</td>";
