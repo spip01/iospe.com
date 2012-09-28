@@ -123,7 +123,7 @@ function wrapper () { // draw.js
 	        this.starbases.remove();
         this.starbases = this.paper.set();
 	    
-        var G =  Math.min(20, Math.max(8 * this.zoom, 6));
+        var G = Math.min(24, Math.max(6 * this.zoom, 3));
         var g = G / 2;
 	    var a = {stroke: "white","stroke-width": "1","stroke-opacity": .75};
         
@@ -139,7 +139,7 @@ function wrapper () { // draw.js
                 this.starbases.push(this.paper.path("M" + h + "," + y + "L" + i + "," + y).attr(a));
 			}
 			else {
-				var j = this.screenY(planet.y - g);
+				var j = this.screenY(planet.y + g);
 				this.starbases.push(vgap.map.paper.image(STARBASE_ICON, i, j, G, G));
 			}
  	    }
@@ -150,12 +150,12 @@ function wrapper () { // draw.js
 	        this.ships.remove();
         this.ships = this.paper.set();
 	    
-        var G =  Math.min(10, Math.max(6 * this.zoom, 5));
+        var G = Math.min(24, Math.max(6 * this.zoom, 3));
         
     	for (var i = 0; i < vgap.ships.length; ++i) {
     		var ship = vgap.ships[i];
-			var x = this.screenX(ship.x - G / 2);
-			var y = this.screenY(ship.y - G / 2);
+			var x = this.screenX(ship.x);
+			var y = this.screenY(ship.y);
 			
     		var l = vgap.shipMap[ship.x+","+ship.y];
     		

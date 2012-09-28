@@ -41,14 +41,7 @@ function wrapper () { // test.js
 			y = planet.y;
 			
 			if (planet.readystatus == 0) {
-				var ships = [];
-				for (var j = 0; j < vgap.myships.length; j++) {
-					ship = vgap.myships[j];
-					if (ship.x == x && ship.y == y) 
-						ships.push(ship);
-				}
-
-				if (ships.length == 0) {										// no ships so complete build
+				if (shipMap[planet.x+","+planet.y] !== undefined) {										// no ships so complete build
 					var built = vgap.map.buildFactories(planet, 15);
 					built += vgap.map.buildDefense(planet, 20);
 					
@@ -77,12 +70,17 @@ function wrapper () { // test.js
 				if (planet.clans < 5 || planet.supplies < 5 || planet.supplies + planet.megacredits < 20) {		// nothing to do here
 					planet.readystatus = 1;
 					planet.changed = 1;
+					c["stroke"] = "purple";
+					this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr(c));
 				}
 				
 				if (planet.readystatus > 0) {
 					c["stroke"] = "orange";
 					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 				}
+				
+				if (planet.changed == 1)
+					vgap.save();
 			}
 		}
 
@@ -94,7 +92,7 @@ function wrapper () { // test.js
 		        var h = vgap.map.screenY(ship.y);
 
 				var shipFC = Number(ship.friendlycode);
-				if (isNaN(ship.friendlycode) || shipFC < 250) {	// generate new FC if the old FC was HYP or < 250 which could be a chunnel
+				if (ship.friendlycode == /\D{3}/ || shipFC < 250) {	// generate new FC if the old FC was HYP or < 250 which could be a chunnel
 					var b = Math.random() * 750 + 250;
 					b = Math.floor(b);
 					ship.friendlycode = b.toString();
@@ -104,55 +102,6 @@ function wrapper () { // test.js
 				}
 				
 				var dist = vgap.map.getDist(ship.x, ship.y, ship.targetx, ship.targety);
-//				if (ship.hullid == 51 && dist == 0 && ship.target.isPlanet) {		// borg probe, if the planet is unowned drop clans to caputure
-//					var planet = ship.target;
-//					if (planet.nativetype != 5) {
-//						if (planet.ownerid == 0 && ship.clans != 0) {	// drop all if natives exist & set ship ready
-//							if (planet.nativeclans != 0) {
-//								ship.transferclans = ship.clans;
-//								ship.clans = 0;
-//								ship.readystatus = 1;
-//							}
-//							else {										// just 1 if planet is empty	
-//								ship.transferclans = 1;
-//								ship.clans -= 1;
-//								if (ship.supplies >= 1) {
-//									ship.transfersupplies = 1;
-//									ship.supplies -= 1;
-//								}
-//							}
-//							
-//							c["stroke"] = "blue";
-//							this.special.push(this.paper.circle(g, h, 16 * this.zoom).attr(c));
-//						}
-//						
-//						if (planet.ownerid == vgap.player.id && planet.factories == 0 && ship.supplies > 0 && ship.megacredits > 0) {
-//							planet.supplies += ship.supplies;
-//							ship.transfersupplies = ship.supplies;
-//							ship.supplies = 0;
-//							planet.megacredits += ship.megacredits;
-//							ship.transfermegacredits = ship.megacredits;
-//							ship.megacredits = 0;
-//							planet.changed = 1;
-//						}
-//						
-//						if (ship.transferclans > 0 || ship.transfersupplies > 0 || ship.transfermegacredits > 0) {
-//							ship.transfertargettype = 1;
-//							ship.transfertargetid = planet.id;
-//							ship.changed = 1;
-//							var built = vgap.map.buildFactories(planet, 15);
-//							
-//							if (built > 0) {
-//								ship.readystatus = 1;
-//								planet.readystatus = 1;
-//								planet.changed = 1;
-//								c["stroke"] = "cyan";
-//								this.special.push(this.paper.circle(g, h, 24 * this.zoom).attr(c));
-//							}
-//						}
-//					}
-//				}
-				
 				if (ship.target && ship.target.isPlanet && dist > 0 && dist <= ship.warp * ship.warp + 3) {	// 1 turn away target set
 					ship.readystatus = 1;
 					ship.changed = 1;
@@ -162,11 +111,14 @@ function wrapper () { // test.js
 					c["stroke"] = "orange";
 					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 				}
+				
+				if (ship.changed == 1)
+					vgap.save();
 			}
 		}
 		
-		vgap.map.savePlanets();
-		vgap.map.saveShips();
+//		vgap.map.savePlanets();
+//		vgap.map.saveShips();
 	};
 
 	vgapMap.prototype.setTaxes = function()
@@ -238,9 +190,13 @@ function wrapper () { // test.js
 				c["stroke"] = "orange";
 				this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 			}
+			
+			if (planet.changed == 1)
+				vgap.save();
+
 		}
 		
-		vgap.map.savePlanets();
+//		vgap.map.savePlanets();
 	};
 	   
 
@@ -504,6 +460,7 @@ function wrapper () { // test.js
 				planet.changed = 1;
 				c["stroke"] = "red";
 				this.special.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
+				vgap.save();
 			}
 		}
 		
@@ -518,11 +475,12 @@ function wrapper () { // test.js
 				ship.changed = 1;
 				c["stroke"] = "orange";
 				this.special.push(this.paper.circle(g, h, 13 * this.zoom).attr(c));
+				vgap.save();
 			}
 		}
 		
-		vgap.map.savePlanets();
-		vgap.map.saveShips();
+//		vgap.map.savePlanets();
+//		vgap.map.saveShips();
 	};
 	
 	vgapMap.prototype.mining = function(planet, percent, inground) {
@@ -530,73 +488,73 @@ function wrapper () { // test.js
 	    return Math.min(inground, rate);
 	};
 	
-	dataObject.prototype.reset = function() {
-        this.data = "";
-        this.add("gameid", vgap.gameId);
-        this.add("playerid", vgap.player.id);
-        this.add("turn", vgap.settings.turn);
-        this.add("version", vgap.version);
-        this.add("savekey", vgap.savekey);
-        this.add("apikey", vgap.apikey);
-        this.add("saveindex", 2);
-	};
-
-	vgapMap.prototype.savePlanets = function()			// taken from vgap planet save() because it saves everything not just 1 planet
-	{
-	    var b = new dataObject();
-	    b.reset();
-        var keycount = 10;
-        
-		for (var i = 0; i < vgap.myplanets.length; i++) {
-			var planet = vgap.myplanets[i];
-			if (planet.changed == 1) {
-				b.add("Planet" + planet.id, vgap.serializePlanet(planet), false);
-				planet.changed = 2;
-				++keycount;
-				
-				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
-			        b.add("keycount", keycount);
-				    vgap.saveInProgress = 2;
-				    vgap.request("/game/save", b, function(f) { 
-				    	if (f.success)
-				    		planet.changed = 0;
-				    	vgap.saveInProgress = 0;
-				    });
-					keycount = 10;
-					b.reset();
-				}
-			}
-		}
-	};
-
-	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
-	{
-	    var b = new dataObject();
-	    b.reset();
-        var keycount = 10;
-        
-		for (var i = 0; i < vgap.myships.length; i++) {
-			var ship = vgap.myships[i];
-			if (ship.changed == 1) {
-				b.add("Ship" + ship.id, vgap.serializeShip(ship), false);
-				ship.changed = 2;
-				++keycount;
-				
-				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
-			        b.add("keycount", keycount);
-				    vgap.saveInProgress = 2;
-				    console.log(b);
-				    vgap.request("/game/save", b, function(f) { 
-				    	if (f.success)
-				    		ship.changed = 0;
-				    	vgap.saveInProgress = 0;
-				    });
-					keycount = 10;
-					b.reset();
-				}
-			}
-		}
-	};
+//	dataObject.prototype.reset = function() {
+//        this.data = "";
+//        this.add("gameid", vgap.gameId);
+//        this.add("playerid", vgap.player.id);
+//        this.add("turn", vgap.settings.turn);
+//        this.add("version", vgap.version);
+//        this.add("savekey", vgap.savekey);
+//        this.add("apikey", vgap.apikey);
+//        this.add("saveindex", 2);
+//	};
+//
+//	vgapMap.prototype.savePlanets = function()			// taken from vgap planet save() because it saves everything not just 1 planet
+//	{
+//	    var b = new dataObject();
+//	    b.reset();
+//        var keycount = 10;
+//        
+//		for (var i = 0; i < vgap.myplanets.length; i++) {
+//			var planet = vgap.myplanets[i];
+//			if (planet.changed == 1) {
+//				b.add("Planet" + planet.id, vgap.serializePlanet(planet), false);
+//				planet.changed = 2;
+//				++keycount;
+//				
+//				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
+//			        b.add("keycount", keycount);
+//				    vgap.saveInProgress = 2;
+//				    vgap.request("/game/save", b, function(f) { 
+//				    	if (f.success)
+//				    		planet.changed = 0;
+//				    	vgap.saveInProgress = 0;
+//				    });
+//					keycount = 10;
+//					b.reset();
+//				}
+//			}
+//		}
+//	};
+//
+//	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
+//	{
+//	    var b = new dataObject();
+//	    b.reset();
+//        var keycount = 10;
+//        
+//		for (var i = 0; i < vgap.myships.length; i++) {
+//			var ship = vgap.myships[i];
+//			if (ship.changed == 1) {
+//				b.add("Ship" + ship.id, vgap.serializeShip(ship), false);
+//				ship.changed = 2;
+//				++keycount;
+//				
+//				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
+//			        b.add("keycount", keycount);
+//				    vgap.saveInProgress = 2;
+//				    console.log(b);
+//				    vgap.request("/game/save", b, function(f) { 
+//				    	if (f.success)
+//				    		ship.changed = 0;
+//				    	vgap.saveInProgress = 0;
+//				    });
+//					keycount = 10;
+//					b.reset();
+//				}
+//			}
+//		}
+//	};
 
 	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
 	{
