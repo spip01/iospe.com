@@ -59,9 +59,9 @@ function wrapper () {	// playerColors.js
 		var g = (Math.cos(s + 2 * Math.PI / 3) + 1) * 127;
 		var b = (Math.cos(s + 4 * Math.PI / 3) + 1) * 127;
 		
-		var rs = "0" + Number(r.toFixed(0)).toString(16);
-		var gs = "0" + Number(g.toFixed(0)).toString(16);
-		var bs = "0" + Number(b.toFixed(0)).toString(16);
+		var rs = "0" + Number(r.toFixed()).toString(16);
+		var gs = "0" + Number(g.toFixed()).toString(16);
+		var bs = "0" + Number(b.toFixed()).toString(16);
 		
 		var rgb = "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
 		
@@ -77,9 +77,9 @@ function wrapper () {	// playerColors.js
 		g *= dim;
 		b *= dim;
 		
-		var rs = "0" + Number(r.toFixed(0)).toString(16);
-		var gs = "0" + Number(g.toFixed(0)).toString(16);
-		var bs = "0" + Number(b.toFixed(0)).toString(16);
+		var rs = "0" + Number(r.toFixed()).toString(16);
+		var gs = "0" + Number(g.toFixed()).toString(16);
+		var bs = "0" + Number(b.toFixed()).toString(16);
 		
 		return "#" + rs.slice(-2) + gs.slice(-2) + bs.slice(-2);
 	};

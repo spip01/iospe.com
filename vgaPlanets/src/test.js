@@ -13,12 +13,6 @@ function wrapper () { // test.js
 	vgapMap.prototype.loadControls = function () {
 
 		oldLoadControls.apply(this, arguments);
-
-		var b = "";
-        b += "<li onclick='vgap.map.showMinerals();'>Show Minerals</li>";
-        b += "<li onclick='vgap.map.showSupplies();'>Show Supplies</li>";
-        
-        $("#MapTools li:contains('Measure')").after(b);
            
         b = "";
         b += "<li onclick='vgap.map.randomizeFC();'>Rand FC</li>";
@@ -27,12 +21,10 @@ function wrapper () { // test.js
         b += "<li onclick='vgap.map.useNotes();'>Use Notes</li>";
         
         $("#MapTools li:contains('Clear')").before(b);
-
-        $(".ShowMinerals").remove();
-   	};
-    	
-	vgapMap.prototype.setSmallComplete = function () 
-	{
+        
+	};
+    		
+	vgapMap.prototype.setSmallComplete = function () {
 		var c = { "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
 		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
@@ -41,7 +33,7 @@ function wrapper () { // test.js
 			y = planet.y;
 			
 			if (planet.readystatus == 0) {
-				if (shipMap[planet.x+","+planet.y] !== undefined) {										// no ships so complete build
+				if (vgap.shipMap[planet.x+","+planet.y] === undefined) {										// no ships so complete build
 					var built = vgap.map.buildFactories(planet, 15);
 					built += vgap.map.buildDefense(planet, 20);
 					
@@ -64,14 +56,14 @@ function wrapper () { // test.js
 					planet.readystatus = 1;
 					planet.changed = 1;
 					c["stroke"] = "purple";
-					this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr(c));
+					this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
 				}
 				
 				if (planet.clans < 5 || planet.supplies < 5 || planet.supplies + planet.megacredits < 20) {		// nothing to do here
 					planet.readystatus = 1;
 					planet.changed = 1;
 					c["stroke"] = "purple";
-					this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr(c));
+					this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
 				}
 				
 				if (planet.readystatus > 0) {
@@ -98,7 +90,7 @@ function wrapper () { // test.js
 					ship.friendlycode = b.toString();
 					ship.changed = 1;
 					c["stroke"] = "red";
-					this.special.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
+					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(c));
 				}
 				
 				var dist = vgap.map.getDist(ship.x, ship.y, ship.targetx, ship.targety);
