@@ -207,7 +207,7 @@ function wrapper () { // chunnelArrows.js
                 	  b = /hyp/i;
                 	  a = d.friendlycode;
                 	  a = a.toString();
-                      if (d.ownerid == c.ownerid && (d.warp == 0 || a.match(b) && a != "") && d.neutronium >= 1 && d.mission != 6 && vgap.map.getDist(c.x, c.y, d.x, d.y) >= 100 && this.isTowTarget(d.id) == null) {
+                      if (d.ownerid == c.ownerid && d.warp == 0 && !a.match(b) && d.neutronium >= 1 && d.mission != 6 && vgap.map.getDist(c.x, c.y, d.x, d.y) >= 100 && this.isTowTarget(d.id) == null) {
                     	  if (d.hullid == 56 || d.hullid == 1054 || c.hullid == 1055 && d.hullid == 51)
                     	  	return true;
                       }

@@ -76,38 +76,15 @@ function wrapper () { // test.js
 			}
 		}
 
-		for (var i = 0; i < vgap.myships.length; i++) {
-			var ship = vgap.myships[i];
-			if (ship.readystatus == 0) {
-				
-		        var g = vgap.map.screenX(ship.x);
-		        var h = vgap.map.screenY(ship.y);
-
-				var shipFC = Number(ship.friendlycode);
-				if (ship.friendlycode == /\D{3}/ || shipFC < 250) {	// generate new FC if the old FC was HYP or < 250 which could be a chunnel
-					var b = Math.random() * 750 + 250;
-					b = Math.floor(b);
-					ship.friendlycode = b.toString();
-					ship.changed = 1;
-					c["stroke"] = "red";
-					this.special.push(this.paper.circle(g, h, 12 * this.zoom).attr(c));
-				}
-				
-				var dist = vgap.map.getDist(ship.x, ship.y, ship.targetx, ship.targety);
-				if (ship.target && ship.target.isPlanet && dist > 0 && dist <= ship.warp * ship.warp + 3) {	// 1 turn away target set
-					ship.readystatus = 1;
-					ship.changed = 1;
-				}
-				
-				if (ship.readystatus > 0) {
-					c["stroke"] = "orange";
-					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
-				}
-				
-				if (ship.changed == 1)
-					vgap.save();
-			}
-		}
+//		for (var i = 0; i < vgap.myships.length; i++) {
+//			var ship = vgap.myships[i];
+//			if (ship.readystatus == 0) {
+//				
+//		        var g = vgap.map.screenX(ship.x);
+//		        var h = vgap.map.screenY(ship.y);
+//
+//			}
+//		}
 		
 //		vgap.map.savePlanets();
 //		vgap.map.saveShips();
@@ -130,8 +107,8 @@ function wrapper () { // test.js
 				happypoints = planet.nativehappypoints;
 				taxrate = planet.nativetaxrate;
 				
-				while (happypoints + happychange != 70 && (happychange > -5 || happypoints + happychange <= 70)) {	// calculate max tax happy tax rate
-					if (happypoints + happychange > 70)
+				while (happypoints + happychange != 30 && (happychange > -5 || happypoints + happychange <= 30)) {	// calculate max tax happy tax rate
+					if (happypoints + happychange > 30)
 						++planet.nativetaxrate;
 					else
 						--planet.nativetaxrate;
@@ -160,11 +137,8 @@ function wrapper () { // test.js
 			taxrate = planet.colonisttaxrate;
 			var coltaxvalue = vgap.map.colonistTaxAmount(planet);
 				
-			while (happypoints + happychange != 70 && (happychange > -5 || happypoints + happychange <= 70)) {	// calculate max tax happy tax rate
-				if (happypoints + happychange > 70)
-					++planet.colonisttaxrate;
-				else
-					--planet.colonisttaxrate;
+			while (happypoints + happychange <= 30) {	// calculate max tax happy tax rate
+				--planet.colonisttaxrate;
 				happychange = vgap.colonistTaxChange(planet);
 	
 				var value = coltaxvalue;
