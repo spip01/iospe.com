@@ -56,19 +56,19 @@ function wrapper () { // test.js
 					planet.readystatus = 1;
 					planet.changed = 1;
 					c["stroke"] = "purple";
-					this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
 				}
 				
 				if (planet.clans < 5 || planet.supplies < 5 || planet.supplies + planet.megacredits < 20) {		// nothing to do here
 					planet.readystatus = 1;
 					planet.changed = 1;
 					c["stroke"] = "purple";
-					this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
 				}
 				
 				if (planet.readystatus > 0) {
 					c["stroke"] = "orange";
-					this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 				}
 				
 				if (planet.changed == 1)
@@ -128,7 +128,7 @@ function wrapper () { // test.js
 					planet.nativehappychange = happychange;
 					planet.changed = 1;
 					c["stroke"] = "yellow";
-					this.special.push(this.paper.circle(g, h, 20 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 20 * this.zoom).attr(c));
 				}
 			}
 	
@@ -154,7 +154,7 @@ function wrapper () { // test.js
 				planet.colhappychange = happychange;
 				planet.changed = 1;
 				c["stroke"] = "orange";
-				this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+				this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
 			}
 			
 			if (planet.changed == 1)
@@ -197,7 +197,7 @@ function wrapper () { // test.js
 	            "<tr> <td>Neutronium: </td><td>&nbsp;" + gsv(hit.neutronium) + " / " + gsv(hit.groundneutronium) + " / " + gsv(neu) + "&nbsp;<td>Colonists: </td><td>&nbsp;" + addCommas(gsv(hit.clans * 100)) + "</td></tr>" + 
 	            "<tr> <td>Duranium: </td><td>&nbsp;" + gsv(hit.duranium) + " / " + gsv(hit.groundduranium) + " / " + gsv(dur) + "&nbsp;</td>" + "<td>Supplies: </td><td>&nbsp;" + gsv(hit.supplies) + " / " + gsv(hit.factories) + "</td></tr>" + 
 	            "<tr> <td>Tritanium: </td><td>&nbsp;" + gsv(hit.tritanium) + " / " + gsv(hit.groundtritanium) + " / " + gsv(tri) + "&nbsp;</td>" + "<td>Megacredits: </td><td>&nbsp;" + gsv(hit.megacredits) + " / " + gsv(tax) + "</td></tr>" + 
-	            "<tr> <td>Molybdenum: </td><td>&nbsp;" + gsv(hit.molybdenum) + " / " + gsv(hit.groundmolybdenum) + " / " + gsv(mol) + "</td></tr>";
+	            "<tr> <td>Molybdenum: </td><td>&nbsp;" + gsv(hit.molybdenum) + " / " + gsv(hit.groundmolybdenum) + " / " + gsv(mol) + "&nbsp;</td>" + "<td>Taxes: </td><td>&nbsp;" + gsv(hit.colonisttaxrate) + "&#37; / " + gsv(hit.nativetaxrate) + "&#37;</td></tr>";
 	            //known planet
 	            if (hit.ownerid != vgap.player.id && hit.ownerid != 0) {
 	                var player = vgap.getPlayer(hit.ownerid);
@@ -434,7 +434,7 @@ function wrapper () { // test.js
 				planet.friendlycode = b.toString();
 				planet.changed = 1;
 				c["stroke"] = "red";
-				this.special.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
+				this.explosions.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
 				vgap.save();
 			}
 		}
@@ -449,7 +449,7 @@ function wrapper () { // test.js
 				ship.friendlycode = b.toString();
 				ship.changed = 1;
 				c["stroke"] = "orange";
-				this.special.push(this.paper.circle(g, h, 13 * this.zoom).attr(c));
+				this.explosions.push(this.paper.circle(g, h, 13 * this.zoom).attr(c));
 				vgap.save();
 			}
 		}
@@ -608,7 +608,7 @@ function wrapper () { // test.js
 					max - planet.factories);			// maximum number of factories we can build
 
 			if (build > 0) {
-				this.special.push(this.paper.circle(g, h, 25 * this.zoom).attr({ stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr({ stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtfactories += build;
 				planet.factories += build;
@@ -634,7 +634,7 @@ function wrapper () { // test.js
 					max - planet.defense);			// maximum number we can build
 
 			if (build > 0) {
-				this.special.push(this.paper.circle(g, h, 30 * this.zoom).attr({ stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 30 * this.zoom).attr({ stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtdefense += build;
 				planet.defense += build;
@@ -659,7 +659,7 @@ function wrapper () { // test.js
 					max - planet.mines);				// maximum number of factories we can build
 
 			if (build > 0) {
-				this.special.push(this.paper.circle(g, h, 35 * this.zoom).attr({ stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 35 * this.zoom).attr({ stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtmines += build;
 				planet.mines += build;
@@ -706,7 +706,7 @@ function wrapper () { // test.js
 					        var g = vgap.map.screenX(planet.x);
 					        var h = vgap.map.screenY(planet.y);
 							++built;
-							this.special.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+							this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 						}
 					}
 					
@@ -723,7 +723,7 @@ function wrapper () { // test.js
 //				if (ship && ship.ownerid == vgap.player.id ) {
 //					var x = ship.x;
 //					var y = ship.y;
-//					this.special.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//					this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 //					var found;
 //					if (found = note.body.match(/hyp:\d+/i)) {		// automatically HYP to next planet based on notes  "HYP:xxx"
 //						found = found.toString();
@@ -733,7 +733,7 @@ function wrapper () { // test.js
 //						ship.targetx = planet.x;
 //						ship.targety = planet.y;
 //						ship.target = planet;
-//						//this.special.push(this.drawLine(ship.x, ship.y, ship.targetx, ship.targety, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//						//this.explosions.push(this.drawLine(ship.x, ship.y, ship.targetx, ship.targety, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 //						ship.friendlycode = "HYP";
 //						ship.mission = 10;
 //						ship.redystatus = 1;
@@ -747,7 +747,7 @@ function wrapper () { // test.js
 //				if (object && object.ownerid == vgap.player.id ) {
 //				var x = object.x;
 //				var y = object.y;
-//				//this.special.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//				//this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 //				}
 //				break;
 
@@ -764,7 +764,7 @@ function wrapper () { // test.js
 //			if (planet.readystatus && planet.clans == 2) {
 //				planet.readystatus = 0;
 //				planet.changed = 1;
-//				//this.special.push(this.drawCircle(planet.x, planet.y, 11 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+//				//this.explosions.push(this.drawCircle(planet.x, planet.y, 11 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 //			}
 //		}
 //	};

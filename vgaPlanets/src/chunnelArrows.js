@@ -195,7 +195,7 @@ function wrapper () { // chunnelArrows.js
   };
 	
   vgaPlanets.prototype.isChunnelling = function(c) {
-      if ((c.hullid == 56 || c.hullid == 1055) && c.warp == 0 && c.neutronium >= 50 && c.mission != 6) {
+      if ((c.hullid == 56 || c.hullid == 55) && c.warp == 0 && c.neutronium >= 50 && c.mission != 6) {
           if (this.isTowTarget(c.id) == null) {
               var b = /\d{3}/;
               var a = c.friendlycode;
@@ -208,7 +208,7 @@ function wrapper () { // chunnelArrows.js
                 	  a = d.friendlycode;
                 	  a = a.toString();
                       if (d.ownerid == c.ownerid && d.warp == 0 && !a.match(b) && d.neutronium >= 1 && d.mission != 6 && vgap.map.getDist(c.x, c.y, d.x, d.y) >= 100 && this.isTowTarget(d.id) == null) {
-                    	  if (d.hullid == 56 || d.hullid == 1054 || c.hullid == 1055 && d.hullid == 51)
+                    	  if (d.hullid == 56 || d.hullid == 54 || c.hullid == 55 && d.hullid == 51)
                     	  	return true;
                       }
                   }
