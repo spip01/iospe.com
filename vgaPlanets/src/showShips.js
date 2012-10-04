@@ -136,7 +136,7 @@ function wrapper () { // wrapper for injection
 				if ((ship = ships[j]) != null) {
 					if (ship.hullid == id) {
 						
-						vgap.map.ships.push(vgap.map.paper.rect(vgap.map.screenX(ship.x + offx * 6), vgap.map.screenY(ship.y + offy * 7), 4, 4).attr({"fill":colors[offy],"opacity":1}));
+						vgap.map.ships.push(vgap.map.paper.rect(vgap.map.screenX(ship.x) + offx * 6, vgap.map.screenY(ship.y) + offy * 7, 4, 4).attr({"fill":colors[offy],"opacity":1}));
 						++offx;
 					}
 				}

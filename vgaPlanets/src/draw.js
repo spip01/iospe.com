@@ -77,23 +77,23 @@ function wrapper () { // draw.js
                 
                 a = {fill:"white", "fill-opacity":.04, "stroke-opacity":0};
                 this.planets.push(vgap.map.paper.circle(x, y, G).attr(a));
+                
                 a = {fill:"white", "fill-opacity":.2, "stroke-opacity":0};
                 this.planets.push(vgap.map.paper.circle(x, y, g).attr(a));
             }
         }
 
+		var c = {fill:"r #462300-#2b1500", "fill-opacity":.01, "stroke-opacity":0};
+		
         for (var i = 0; i < vgap.planets.length; ++i) {                            
         	var planet = vgap.planets[i];
             
             if (planet.debrisdisk > 1) {
             	if (planet.debrisdisk > 1) {
             		var G = planet.debrisdisk * this.zoom;
-                    var s  = "#462300";
-                    var e  = "#2b1500";
                     
 		            var x = this.screenX(planet.x);
 		            var y = this.screenY(planet.y);
-            		var c = {fill:"r "+s+"-"+e, "fill-opacity":.01, "stroke-opacity":0};
             		
             		this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
             	}
@@ -112,6 +112,10 @@ function wrapper () { // draw.js
             var x = this.screenX(planet.x);
             var y = this.screenY(planet.y);
             var color = this.getColors(planet.ownerid);
+            if (planet.ownerid == 0 && planet.infoturn != 0) {
+            	color.start = "#73610c";
+                color.end = "#4d2c04";
+            }
             var c = {fill:"0-"+color.start+"-"+color.end, "fill-opacity":1};
             
             this.planets.push(vgap.map.paper.circle(x, y, G).attr(c));
@@ -124,24 +128,21 @@ function wrapper () { // draw.js
         this.starbases = this.paper.set();
 	    
         var G = Math.min(24, Math.max(6 * this.zoom, 3));
-        var g = G / 2;
-	    var a = {stroke: "white","stroke-width": "1","stroke-opacity": .75};
+	    var a = {stroke:"white", "stroke-width":1, "stroke-opacity":.75};
         
-	   	for (var i=0; i<vgap.starbases.length; ++i) {
-    		var starbase = vgap.starbases[i];
-    		var planet = vgap.planets[starbase.planetid-1];
-			var h = this.screenX(planet.x + g);
-			var i = this.screenX(planet.x - g);
+	   	for (var n=0; n<vgap.starbases.length; ++n) {
+    		var starbase = vgap.starbases[n];
+    		var planet = vgap.getPlanet(starbase.planetid);
+			var x = this.screenX(planet.x);
 			var y = this.screenY(planet.y);
+	        var g = Math.ceil(G / 2);
+	        
 			if (this.zoom < 1) {
-                var el = this.paper.path("M" + h + "," + y + "L" + i + "," + y).attr(a);
-                this.starbases.push(el.transform("r90"));
-                this.starbases.push(this.paper.path("M" + h + "," + y + "L" + i + "," + y).attr(a));
+                this.starbases.push(this.paper.path("M" + (x + g) + "," + y + "L" + (x - g) + "," + y).attr(a));
+                this.starbases.push(this.paper.path("M" + x + "," + (y + g) + "L" + x + "," + (y - g)).attr(a));
 			}
-			else {
-				var j = this.screenY(planet.y + g);
-				this.starbases.push(vgap.map.paper.image(STARBASE_ICON, i, j, G, G));
-			}
+			else 
+				this.starbases.push(vgap.map.paper.image(STARBASE_ICON, x - g, y - g, G, G));
  	    }
 	};
     
@@ -222,8 +223,8 @@ function wrapper () { // draw.js
         for (var b in vgap.messages) {
             var c = vgap.messages[b];
             if (c.messagetype == 10) {
-                var h = this.screenX(c.x - G);
-                var i = this.screenX(c.x + G);
+                var h = this.screenX(c.x) - G;
+                var i = this.screenX(c.x) + G;
                 var e = this.screenY(c.y);
                 var el = this.paper.path("M" + h + "," + e + "L" + i + "," + e).attr(a);
                 this.explosions.push(el);
@@ -259,7 +260,7 @@ function wrapper () { // draw.js
             
             var a = {fill:"r"+s+"-"+e, "fill-opacity":c, "stroke-opacity":0};
 
-            this.ionstorms.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
+            this.ionstorms.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), d.radius * this.zoom).attr(a));
         }
         
         for (var b = 0; b < vgap.ionstorms.length; b++) {
@@ -281,7 +282,7 @@ function wrapper () { // draw.js
             var d = vgap.minefields[c];
 		    var c = this.getColors(d.ownerid);
             var a = {stroke:c.start, "stroke-width":1, "stroke-opacity":0.5, fill:c.start, "fill-opacity":0.2};
-            this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), (d.radius * this.zoom)).attr(a));
+            this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), d.radius * this.zoom).attr(a));
         }
     };
     
@@ -293,8 +294,8 @@ function wrapper () { // draw.js
                 for (var U = (this.centerY - 3); U <= this.centerY + 3; U++) {
                     if (this.getDist(T, U, this.centerX, this.centerY) <= 3) {
                         var G = this.zoom / 2;
-                        var z = this.screenX(T - G);
-                        var A = this.screenY(U - G);
+                        var z = this.screenX(T) - G;
+                        var A = this.screenY(U) - G;
                         this.planets.push(this.paper.rect(z, A, G * 2, G * 2).attr(a));
                     }
                 }
