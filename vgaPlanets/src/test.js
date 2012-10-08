@@ -14,7 +14,7 @@ function wrapper () { // test.js
 
 		oldLoadControls.apply(this, arguments);
            
-        b = "";
+        var b = "";
         b += "<li onclick='vgap.map.randomizeFC();'>Rand FC</li>";
         b += "<li onclick='vgap.map.setTaxes();'>Set Taxes</li>";
         b += "<li onclick='vgap.map.setSmallComplete();'>Set Complete</li>";
@@ -165,8 +165,8 @@ function wrapper () { // test.js
 //		vgap.map.savePlanets();
 	};
 	   
-
-    vgapMap.prototype.hitTextBox = function(hit) {
+	
+	vgapMap.prototype.hitTextBox = function(hit) {
 	    var txt = "";
 	    if (hit.isPlanet) { //planet
 	        txt += "<div class='ItemSelectionBox minCorrection'>";
