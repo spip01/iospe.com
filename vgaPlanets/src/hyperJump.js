@@ -30,12 +30,10 @@ function wrapper () {	// hyperJump.js
 	    		localStorage.hyperjumpRing = "true";
 	    		localStorage.hyperjumpPlanets = "true";
 	    		localStorage.ringColor = "#80ffff";
-	    		localStorage.circleAt81 = "true";
-	    		localStorage.circleAt64 = "false";
-	    		localStorage.circleAt49 = "false";
-	    		localStorage.circleAt36 = "false";
-	    		localStorage.circleAt25 = "false";
-	    		localStorage.circleAt16 = "false";
+	    		localStorage.warpCircle = [];
+	    		for (var i=1; i<10; ++i)
+	    			localStorage["warpCircle.r"+i] = "false";
+	    		localStorage["warpCircle.r9"] = "true";
 	    		localStorage.use2x = "false";
 	    	}
     	}
@@ -53,15 +51,13 @@ function wrapper () {	// hyperJump.js
 		b += "<div id='hyperjumpOptions'><table>";
 		b += "<tr><td><input id='hyperjumpPlanets' type='checkbox'" + (localStorage.hyperjumpPlanets == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;Mark planets in jump range</td></tr>";
 		b += "<tr><td><input id='hyperjumpRing' type='checkbox'" + (localStorage.hyperjumpRing == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;Draw double ring at jump radius</td>";
-		b +=     "<td colspan=2><input id='ringColor' type='color' value=" + localStorage.ringColor + " />&nbsp;&nbsp;Ring color</td></tr>";
+		b +=     "<td colspan=9><input id='ringColor' type='color' value=" + localStorage.ringColor + " />&nbsp;&nbsp;Ring color</td></tr>";
 
-		b += "<tr><td colspan=2><input id='circleAt81' type='checkbox'" + (localStorage.circleAt81 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;Draw warp circle at 81ly</td>";
-		b +=     "<td><input id='circleAt64' type='checkbox'" + (localStorage.circleAt64 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;64ly</td>";
-		b +=     "<td><input id='circleAt49' type='checkbox'" + (localStorage.circleAt49 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;49ly</td></tr>";
-		b += "<tr><td><input id='circleAt36' type='checkbox'" + (localStorage.circleAt36 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;36ly</td>";
-		b +=     "<td><input id='circleAt25' type='checkbox'" + (localStorage.circleAt25 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;25ly</td>";
-		b +=     "<td><input id='circleAt16' type='checkbox'" + (localStorage.circleAt16 == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;16ly</td>";
-		b +=     "<td><input id='use2x' type='checkbox'" + (localStorage.use2x == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;Use 2x movement</td></tr>";
+		b += "<tr><td>Draw warp circles at:&nbsp;</td>";
+		for (var i=1; i<10; ++i) 
+			b += "<td><input id='warpCircle.r"+i+"' type='checkbox'" + (localStorage['warpCircle.r'+i] == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;"+(i*i)+"&nbsp;ly</td>";
+		
+		b += "</tr><tr><td><input id='use2x' type='checkbox'" + (localStorage.use2x == "true" ? "checked='true'" : "") + "/>&nbsp;&nbsp;Use 2x movement</td></tr>";
 		b += "</table></div>";
    
 		$('[onclick="vgap.resetTurn();"]').after(b);
@@ -107,18 +103,10 @@ function wrapper () {	// hyperJump.js
         var h = vgap.map.screenY(y);
         var mult = localStorage.use2x == "true" ? 2 : 1;
         
-		if (localStorage.circleAt81 == "true")
-			this.explosions.push(this.paper.circle(g, h, 81 * mult * this.zoom).attr(a));
-		if (localStorage.circleAt64 == "true")
-			this.explosions.push(this.paper.circle(g, h, 64 * mult * this.zoom).attr(a));
-		if (localStorage.circleAt49 == "true")
-			this.explosions.push(this.paper.circle(g, h, 49 * mult * this.zoom).attr(a));
-		if (localStorage.circleAt36 == "true")
-			this.explosions.push(this.paper.circle(g, h, 36 * mult * this.zoom).attr(a));
-		if (localStorage.circleAt25== "true")
-			this.explosions.push(this.paper.circle(g, h, 25 * mult * this.zoom).attr(a));
-		if (localStorage.circleAt16 == "true")
-			this.explosions.push(this.paper.circle(g, h, 16 * mult * this.zoom).attr(a));
+        for (var i=1; i<10; ++i) {
+        	if (localStorage['warpCircle.r'+i] == "true")
+        		this.explosions.push(this.paper.circle(g, h, i * 8 * mult * this.zoom).attr(a));
+        }
 	};
 	
 	vgapMap.prototype.hyperjump = function(x, y) {		// replaces vgap map hyperjump function

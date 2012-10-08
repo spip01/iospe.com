@@ -56,7 +56,7 @@ function wrapper () {	// checkstarbase.js
 	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
 	vgapDashboard.prototype.saveSettings = function() {
 		
-		$("#MaxTurnsAway input[type='range']").each(function(b) {
+		$("#turnsAway input[type='range']").each(function(b) {
 			localStorage[$(this).attr("id")] = $(this).val();
 		});
 	    

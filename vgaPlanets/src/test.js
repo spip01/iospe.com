@@ -25,7 +25,7 @@ function wrapper () { // test.js
 	};
     		
 	vgapMap.prototype.setSmallComplete = function () {
-		var c = { "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
+		var c = { "stroke-width": 2 * this.zoom, "stroke-opacity": 1 };
 		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
@@ -55,20 +55,20 @@ function wrapper () { // test.js
 				if (planet.factories >= vgap.map.maxBuildings(planet, 100) && planet.defense >= vgap.map.maxBuildings(planet, 50) && planet.mines >= vgap.map.maxBuildings(planet, 200)) {
 					planet.readystatus = 1;
 					planet.changed = 1;
-					c["stroke"] = "purple";
-					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
+					c["stroke"] = "blue";
+					this.explosions.push(this.paper.circle(g, h, 22 * this.zoom).attr(c));
 				}
 				
 				if (planet.clans < 5 || planet.supplies < 5 || planet.supplies + planet.megacredits < 20) {		// nothing to do here
 					planet.readystatus = 1;
 					planet.changed = 1;
 					c["stroke"] = "purple";
-					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 19 * this.zoom).attr(c));
 				}
 				
 				if (planet.readystatus > 0) {
 					c["stroke"] = "orange";
-					this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 16 * this.zoom).attr(c));
 				}
 				
 				if (planet.changed == 1)
@@ -128,7 +128,7 @@ function wrapper () { // test.js
 					planet.nativehappychange = happychange;
 					planet.changed = 1;
 					c["stroke"] = "yellow";
-					this.explosions.push(this.paper.circle(g, h, 20 * this.zoom).attr(c));
+					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
 				}
 			}
 	
@@ -154,7 +154,7 @@ function wrapper () { // test.js
 				planet.colhappychange = happychange;
 				planet.changed = 1;
 				c["stroke"] = "orange";
-				this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr(c));
+				this.explosions.push(this.paper.circle(g, h, 28 * this.zoom).attr(c));
 			}
 			
 			if (planet.changed == 1)
@@ -335,65 +335,6 @@ function wrapper () { // test.js
 	    return false;
 	};
 	
-	vgapMap.prototype.showMinerals = function () 
-	{
-		var c = { "stroke-width": 2, "stroke-opacity": 1 };
-		for (var i=0; i < vgap.myplanets.length; ++i) {
-			var planet = vgap.myplanets[i];
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
-						
-			if (planet.neutronium > 400) {
-				c["stroke"] = vgap.dash.getColorSlot(1);
-				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.neutronium - 400)) * this.zoom).attr(c));
-			}
-			if (planet.duranium > 400) {
-				c["stroke"] = vgap.dash.getColorSlot(3);
-				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.duranium - 400)) * this.zoom).attr(c));
-			}
-			if (planet.tritanium > 400) {
-				c["stroke"] = vgap.dash.getColorSlot(5);
-				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.tritanium - 400)) * this.zoom).attr(c));
-			}
-			if (planet.molybdenum > 400) {
-				c["stroke"] = vgap.dash.getColorSlot(7);
-				this.special.push(this.paper.circle(g, h, (26 + Math.sqrt(planet.molybdenum - 400)) * this.zoom).attr(c));
-			}
-		}
-	};
-
-	vgapMap.prototype.showSupplies = function () 
-	{
-		var c = { "stroke-width": 2, "stroke-opacity": 1 };
-		for (var i=0; i<vgap.myplanets.length; ++i) {
-			var planet = vgap.myplanets[i];
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
-			
-			if (planet.megacredits + planet.supplies > 1000) {
-				c["stroke"] = vgap.dash.getColorSlot(9);
-				this.special.push(this.paper.circle(g, h, (10 + Math.sqrt(planet.megacredits)) * this.zoom).attr(c));
-				c["stroke"] = vgap.dash.getColorSlot(11);
-				this.special.push(this.paper.circle(g, h, (10 + Math.sqrt(planet.supplies)) * this.zoom).attr(c));
-			}
-		}
-	};
-
-	vgapMap.prototype.showColonist = function () 
-	{
-		for (var i=0; i<vgap.myplanets.length; ++i) {
-			var planet = vgap.myplanets[i];
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
-			var c = { "stroke-width": 2, "stroke-opacity": 1 };
-
-			c["stroke"] = "red";
-			this.special.push(this.paper.circle(g, h, (10 + Math.log(planet.clans)) * this.zoom).attr(c));
-			c["stroke"] = "orange";
-			this.special.push(this.paper.circle(g, h, (10 + Math.log(planet.nativeclans)) * this.zoom).attr(c));
-		}
-	};
-
 	vgapMap.prototype.nativeTaxAmount = function (planet)		// taken from vgap planet screen because it uses an undefined this when I need it
 	{
 		var a = planet.nativetaxrate;
@@ -463,74 +404,6 @@ function wrapper () { // test.js
 	    return Math.min(inground, rate);
 	};
 	
-//	dataObject.prototype.reset = function() {
-//        this.data = "";
-//        this.add("gameid", vgap.gameId);
-//        this.add("playerid", vgap.player.id);
-//        this.add("turn", vgap.settings.turn);
-//        this.add("version", vgap.version);
-//        this.add("savekey", vgap.savekey);
-//        this.add("apikey", vgap.apikey);
-//        this.add("saveindex", 2);
-//	};
-//
-//	vgapMap.prototype.savePlanets = function()			// taken from vgap planet save() because it saves everything not just 1 planet
-//	{
-//	    var b = new dataObject();
-//	    b.reset();
-//        var keycount = 10;
-//        
-//		for (var i = 0; i < vgap.myplanets.length; i++) {
-//			var planet = vgap.myplanets[i];
-//			if (planet.changed == 1) {
-//				b.add("Planet" + planet.id, vgap.serializePlanet(planet), false);
-//				planet.changed = 2;
-//				++keycount;
-//				
-//				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
-//			        b.add("keycount", keycount);
-//				    vgap.saveInProgress = 2;
-//				    vgap.request("/game/save", b, function(f) { 
-//				    	if (f.success)
-//				    		planet.changed = 0;
-//				    	vgap.saveInProgress = 0;
-//				    });
-//					keycount = 10;
-//					b.reset();
-//				}
-//			}
-//		}
-//	};
-//
-//	vgapMap.prototype.saveShips = function()			// taken from vgap planet save() because it saves everything not just 1 planet
-//	{
-//	    var b = new dataObject();
-//	    b.reset();
-//        var keycount = 10;
-//        
-//		for (var i = 0; i < vgap.myships.length; i++) {
-//			var ship = vgap.myships[i];
-//			if (ship.changed == 1) {
-//				b.add("Ship" + ship.id, vgap.serializeShip(ship), false);
-//				ship.changed = 2;
-//				++keycount;
-//				
-//				if (vgap.saveInProgress == 0) {		// ignoring this causes an error
-//			        b.add("keycount", keycount);
-//				    vgap.saveInProgress = 2;
-//				    console.log(b);
-//				    vgap.request("/game/save", b, function(f) { 
-//				    	if (f.success)
-//				    		ship.changed = 0;
-//				    	vgap.saveInProgress = 0;
-//				    });
-//					keycount = 10;
-//					b.reset();
-//				}
-//			}
-//		}
-//	};
-
 	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
 	{
 		var e = 0;
@@ -608,7 +481,7 @@ function wrapper () { // test.js
 					max - planet.factories);			// maximum number of factories we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr({ stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 31 * this.zoom).attr({ stroke: "green", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtfactories += build;
 				planet.factories += build;
@@ -634,7 +507,7 @@ function wrapper () { // test.js
 					max - planet.defense);			// maximum number we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 30 * this.zoom).attr({ stroke: "blue", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 34 * this.zoom).attr({ stroke: "blue", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtdefense += build;
 				planet.defense += build;
@@ -659,7 +532,7 @@ function wrapper () { // test.js
 					max - planet.mines);				// maximum number of factories we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 35 * this.zoom).attr({ stroke: "purple", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+				this.explosions.push(this.paper.circle(g, h, 37 * this.zoom).attr({ stroke: "purple", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
 
 				planet.builtmines += build;
 				planet.mines += build;
@@ -706,7 +579,7 @@ function wrapper () { // test.js
 					        var g = vgap.map.screenX(planet.x);
 					        var h = vgap.map.screenY(planet.y);
 							++built;
-							this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+							this.explosions.push(this.paper.circle(g, h, 40 * this.zoom).attr({ stroke: "yellow", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
 						}
 					}
 					

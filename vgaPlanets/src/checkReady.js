@@ -102,7 +102,7 @@ function wrapper () { // checkready.js
 				var c = { stroke: localStorage.starbaseNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(planet.x);
 	            var h = vgap.map.screenY(planet.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 15 * this.zoom).attr(c));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 13 * this.zoom).attr(c));
 //					this.drawCircle(planet.x, planet.y, 15 * this.zoom, { stroke: "blue", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 		}
@@ -113,7 +113,7 @@ function wrapper () { // checkready.js
 				var d = { stroke: localStorage.shipNotReady, "stroke-width": 2, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(d));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 16 * this.zoom).attr(d));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "green", "stroke-width": 2, "stroke-opacity": 1 });
 			}
 
@@ -129,7 +129,7 @@ function wrapper () { // checkready.js
 				var e = { stroke: localStorage.hypWarning, "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
 	            var g = vgap.map.screenX(ship.x);
 	            var h = vgap.map.screenY(ship.y);
-				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 20 * this.zoom).attr(e));
+				vgap.map.explosions.push(vgap.map.paper.circle(g, h, 19 * this.zoom).attr(e));
 //					this.drawCircle(ship.x, ship.y, 20 * this.zoom, { stroke: "red", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 });
 			}
 		}
