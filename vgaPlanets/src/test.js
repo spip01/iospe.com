@@ -23,6 +23,8 @@ function wrapper () { // test.js
         $("#MapTools li:contains('Clear')").before(b);
         
         localStorage.showCargoOnCombat = "false";
+        
+        vgap.map.findDefaultNote();
 	};
     		
 	vgapMap.prototype.setSmallComplete = function () {
@@ -93,45 +95,11 @@ function wrapper () { // test.js
 
 	vgapMap.prototype.setTaxes = function()
 	{
-		var happychange;
-		var happypoints;
-		var taxrate;
-		var c = { "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
-		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
 			
-			if (planet.nativeclans != 0) {
-				happychange = planet.nativehappychange;
-				happypoints = planet.nativehappypoints;
-				taxrate = planet.nativetaxrate;
-				
-				while (happypoints + happychange != 30 && (happychange > -5 || happypoints + happychange <= 30)) {	// calculate max tax happy tax rate
-					if (happypoints + happychange > 30)
-						++planet.nativetaxrate;
-					else
-						--planet.nativetaxrate;
-					happychange = vgap.nativeTaxChange(planet);
-					
-					var value = planet.nativetaxvalue;
-					planet.nativetaxvalue = vgap.map.nativeTaxAmount(planet);
-					if (value == planet.nativetaxvalue) {
-						--planet.nativetaxrate;
-						happychange = vgap.nativeTaxChange(planet);
-						planet.nativetaxvalue = vgap.map.nativeTaxAmount(planet);
-						break;
-					}
-				}   
-				
-				if (taxrate != planet.nativetaxrate) {
-					planet.nativehappychange = happychange;
-					planet.changed = 1;
-					c["stroke"] = "yellow";
-					this.explosions.push(this.paper.circle(g, h, 25 * this.zoom).attr(c));
-				}
-			}
+			if (planet.nativeclans != 0) 
+				vgap.map.setNativeTaxHappy(planet, 70);
 	
 			happychange = planet.colhappychange;
 			happypoints = planet.colonisthappypoints;
@@ -154,41 +122,71 @@ function wrapper () { // test.js
 			if (taxrate != planet.colonisttaxrate) {
 				planet.colhappychange = happychange;
 				planet.changed = 1;
-				c["stroke"] = "orange";
-				this.explosions.push(this.paper.circle(g, h, 28 * this.zoom).attr(c));
 			}
 			
-			if (planet.changed == 1)
+			if (planet.changed == 1) {
 				vgap.save();
-
+				
+		        var g = vgap.map.screenX(planet.x);
+		        var h = vgap.map.screenY(planet.y);
+				
+				var c = { "stroke":"orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 };
+				this.explosions.push(this.paper.circle(g, h, 28 * this.zoom).attr(c));
+			}
 		}
 	};
-	   	
+	
+	vgapMap.prototype.setNativeTaxHappy = function (planet, happy) {
+		var tax = planet.nativetaxvalue;
+		
+		planet.nativehappychange = happy - planet.nativehappypoints;
+		planet.nativetaxrate = vgap.map.nativeTaxRateFHappy(planet);
+		if (planet.nativetaxrate > 20) {
+	        var b = vgap.getPlayer(planet.ownerid);
+            if (b.raceid == 6)
+            	planet.nativetaxrate = 20;
+		}
+		planet.nativetaxvalue = vgap.map.nativeTaxAmount(planet);
+		
+		if (planet.nativetaxvalue > planet.clans) { 
+			planet.nativetaxvalue = planet.clans;
+			planet.nativetaxrate = vgap.map.nativeTaxRateFAmount(planet);
+			planet.nativehappychange = vgap.nativeTaxChange(planet);
+		}
+		
+		if (tax != planet.nativetaxvalue) {
+			planet.changed = 1;
+	};
+	
+	vgapMap.prototype.nativeTaxRateFHappy = function (planet) {
+		var tx = - Math.floor((planet.nativehappychange*100 - 1000 + Math.sqrt(planet.nativeclans) + (planet.factories + planet.mines)/2 + 50*(10-planet.nativegovernment)) / 85); 
+		return tx;
+	};
+	
+	vgapMap.prototype.nativeTaxRateFAmount = function (planet) {
+		var tx = Math.floor(planet.nativetaxvalue / planet.nativegovernment / planet.nativeclans * 200000);
+		return tx;
+	};
+	
+	vgapMap.prototype.colonistTaxRateFHappy = function (planet) {
+		var tx = - Math.floor((planet.colhappychange * 100 - 1000 + Math.sqrt(planet.clans) + Math.abs(50 - planet.temp)*3 + (planet.factories + planet.mines)/3) / 80); 
+		return tx;
+	};
+	
 	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
 	{
-		var e = 0;
-		if (planet.nativeclans > 0) {
-			var a = planet.nativetaxrate;
-			var b = vgap.getPlayer(planet.ownerid);
-			if (b != null) 
-				if (b.raceid == 6 && a > 20) 
-					a = 20;
-	
-			e = Math.round(a * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
-			if (e > planet.clans) 
-				e = planet.clans;
-	
-			var d = 1;
-			if (vgap.advActive(2)) 
-				d = 2;
-	
-			e = e * d;
-			if (planet.nativetype == 6) 
-				e = e * 2;
-	
-			if (e > 5000) 
-				e = 5000;
-		}
+		var e = Math.round(planet.nativetaxrate * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
+
+		var d = 1;
+		if (vgap.advActive(2)) 
+			d = 2;
+		e = e * d;
+		
+		if (planet.nativetype == 6) 
+			e = e * 2;
+
+		if (e > 5000) 
+			e = 5000;
 		
 		return e;
 	};
@@ -515,8 +513,9 @@ function wrapper () { // test.js
 		return build;
 	};
 
-	vgapMap.prototype.useNotes = function () 
-	{
+	vgapMap.prototype.findDefaultNote = function () {
+		var foundPlanetDefault = false;
+
 		for (var i = 0; i < vgap.notes.length; i++) {
 			var note = vgap.notes[i];
 			if (note.body == "")
@@ -524,101 +523,107 @@ function wrapper () { // test.js
 			
 			switch (note.targettype) {
 			case 1: // planet
+//				"default":
 //				{"tax-happy":"70","nattax":"20",
 //				 "build":[{"defenses":"20","factories":"20","mines":"20"},
 //					      {"factories":"60","mines":"60","defenses":"60"}]}
-
+				if (foundPlanetDefault)
+					continue;
+				
 				var planet = vgap.getPlanet(note.targetid);
 				
 				if (planet && planet.ownerid == vgap.player.id ) {
 					var body = note.body;
 					var jn = JSON.parse(body);
-					
-					if (jn["tax-happy"] != undefined) {		// keep happyponts here
+					if (jn["default"] != undefined) {
+						vgap.myPlanetDefault = jn["default"];
+						foundPlanetDefault = true;
+						continue;
 					}
-					if (jn["tax-growth"] != undefined) {	// maxamize growth let happypoints go to 100 then tax to 70 (default)
-					}
-					if (jn["nattax-happy"] != undefined) {	// keep happyponts here 70 (default) 30 for Borg
-					}
-					if (jn["nattax-growth"] != undefined) {	// maxamize growth let happypoints go to 100 then tax to 70
-					}
-					if (jn["build"] != undefined) {
-						var built = 0;
-						for (var i=0; i<jn["build"].length && built == 0; ++i) {
-							var b = jn["build"][i];				// builds f 15, d 20, f 60, m 60, f 100, m 100, d 100 by default
-	
-							if (b["factories"] != undefined) 
-								built += vgap.map.buildFactories(planet, Number(b["factories"]));
-							
-							if (b["mines"] != undefined) 
-								built += vgap.map.buildMines(planet, Number(b["mines"]));
-							
-							if (b["defenses"] != undefined) 
-								built += vgap.map.buildDefenses(planet, Number(b["defenses"]));
-						}
-					}
-
-					planet.redystatus = 1;
-					planet.changed = 1;
-					vgap.save();
-
-					var x = this.screenX(planet.x);
-					var y = this.screenY(planet.y);
-					this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-					
 				}
 				break;
-				
-//				case 2: // ship
-//				var ship = vgap.getShip(note.targetid);
-//				if (ship && ship.ownerid == vgap.player.id ) {
-//					var x = ship.x;
-//					var y = ship.y;
-//					this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-//					var found;
-//					if (found = note.body.match(/hyp:\d+/i)) {		// automatically HYP to next planet based on notes  "HYP:xxx"
-//						found = found.toString();
-//						var id = found.match(/\d+/);
-//						id = Number(id);
-//						var planet = vgap.planets[id-1];
-//						ship.targetx = planet.x;
-//						ship.targety = planet.y;
-//						ship.target = planet;
-//						//this.explosions.push(this.drawLine(ship.x, ship.y, ship.targetx, ship.targety, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-//						ship.friendlycode = "HYP";
-//						ship.mission = 10;
-//						ship.redystatus = 1;
-//						ship.changed = 1;
-//					}
-//				}
-//				break;
-				
-//				case 3: // starbase
-//				var object = vgap.getStarbase(note.targetid);
-//				if (object && object.ownerid == vgap.player.id ) {
-//				var x = object.x;
-//				var y = object.y;
-//				//this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "orange", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-//				}
-//				break;
-
+			case 2: // ship 
+				break;
+			case 3: // starbase 
+				break;
 			}
-
-
+		}
+	};
+	
+	vgapMap.prototype.useNotes = function () 
+	{
+		for (var i = 0; i < vgap.notes.length; i++) {
+			var note = vgap.notes[i];
+			var body = note.body;
+			
+			switch (note.targettype) {
+			case 1: // planet
+				var planet = vgap.getPlanet(note.targetid);
+				
+				if (planet && planet.ownerid == vgap.player.id ) {
+					try {
+						JSON.parse(body, function(jn, planet) {
+							vgap.map.execPlanetNote(jn, planet);
+						});
+					}
+					catch (e) {
+						continue;
+					}
+				}
+				break;
+			case 2: // ship 
+				break;
+			case 3: // starbase 
+				break;
+			}
 		}
 	};
 
-//	vgapMap.prototype.resetCompleted = function () 
-//	{
-//		for (var i = 0; i < vgap.myplanets.length; i++) {
-//			var planet = vgap.myplanets[i];
-//			if (planet.readystatus && planet.clans == 2) {
-//				planet.readystatus = 0;
-//				planet.changed = 1;
-//				//this.explosions.push(this.drawCircle(planet.x, planet.y, 11 * this.zoom, { stroke: "green", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-//			}
-//		}
-//	};
+	vgapMap.prototype.execPlanetNote = function (jn, planet) {
+//		"tax-happy":"70","nattax-happy":"70",
+//		 "build":[{"defenses":"20","factories":"20","mines":"20"},
+//			      {"factories":"60","mines":"60","defenses":"60"}]
+
+		if (jn["tax-happy"] != undefined) {
+			vgap.map.setColTaxHappy(planet, Number(jn["tax-happy"]));
+		}
+		
+		if (jn["tax-growth"] != undefined) {
+			if (planet.happypoints >= 90)
+				vgap.map.setColTaxHappy(planet, 70);
+			else
+				vgap.map.setColTaxRate(planet, 0);
+		}
+		
+		if (jn["nattax-happy"] != undefined) {
+			vgap.map.setNativeTaxHappy(planet, Number(jn["nattax-happy"]));
+		}
+		
+		if (jn["build"] != undefined) {
+			var built = 0;
+			for (var i=0; i<jn["build"].length && built == 0; ++i) {
+				var b = jn["build"][i];
+
+				if (b["factories"] != undefined) 
+					built += vgap.map.buildFactories(planet, Number(b["factories"]));
+				
+				if (b["mines"] != undefined) 
+					built += vgap.map.buildMines(planet, Number(b["mines"]));
+				
+				if (b["defenses"] != undefined) 
+					built += vgap.map.buildDefenses(planet, Number(b["defenses"]));
+			}
+		}
+
+		planet.redystatus = 1;
+		planet.changed = 1;
+		vgap.save();
+
+		var x = this.screenX(planet.x);
+		var y = this.screenY(planet.y);
+		this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+
+	};
 	
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
