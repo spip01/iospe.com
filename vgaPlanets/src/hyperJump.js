@@ -105,7 +105,7 @@ function wrapper () {	// hyperJump.js
         
         for (var i=1; i<10; ++i) {
         	if (localStorage['warpCircle.r'+i] == "true")
-        		this.explosions.push(this.paper.circle(g, h, i * 8 * mult * this.zoom).attr(a));
+        		this.explosions.push(this.paper.circle(g, h, i * i * mult * this.zoom).attr(a));
         }
 	};
 	

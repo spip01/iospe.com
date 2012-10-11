@@ -22,6 +22,7 @@ function wrapper () { // test.js
         
         $("#MapTools li:contains('Clear')").before(b);
         
+        localStorage.showCargoOnCombat = "false";
 	};
     		
 	vgapMap.prototype.setSmallComplete = function () {
@@ -161,11 +162,51 @@ function wrapper () { // test.js
 				vgap.save();
 
 		}
-		
-//		vgap.map.savePlanets();
 	};
-	   
+	   	
+	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
+	{
+		var e = 0;
+		if (planet.nativeclans > 0) {
+			var a = planet.nativetaxrate;
+			var b = vgap.getPlayer(planet.ownerid);
+			if (b != null) 
+				if (b.raceid == 6 && a > 20) 
+					a = 20;
 	
+			e = Math.round(a * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
+			if (e > planet.clans) 
+				e = planet.clans;
+	
+			var d = 1;
+			if (vgap.advActive(2)) 
+				d = 2;
+	
+			e = e * d;
+			if (planet.nativetype == 6) 
+				e = e * 2;
+	
+			if (e > 5000) 
+				e = 5000;
+		}
+		
+		return e;
+	};
+	
+	vgapMap.prototype.colonistTaxAmount = function(planet)	// taken from vgap screen because it uses an undefined this when I need it
+	{
+		var a = Math.round(planet.colonisttaxrate * planet.clans / 1000);
+		var b = 1;
+		if (vgap.advActive(2)) {
+			b = 2;
+		}
+		a = a * b;
+		if (a > 5000) {
+			a = 5000;
+		}
+		return a;
+	};
+
 	vgapMap.prototype.hitTextBox = function(hit) {
 	    var txt = "";
 	    if (hit.isPlanet) { //planet
@@ -204,7 +245,7 @@ function wrapper () { // test.js
 	                var race = vgap.getRace(player.raceid);
 	                txt += "<tr><td colspan='4'>" + race.name + " (" + player.username + ")</td></tr>";
 	            }
-	            txt += this.hitText(hit, hit.isPlanet).replace("&nbsp", "");
+	            txt += this.hitText(hit, hit.isPlanet);
 	            var starbase;
 	            if (starbase = vgap.getStarbase(hit.id)) {
 	    	        txt += "<tr><td class='WarnText'>Starbase</td>";
@@ -244,10 +285,12 @@ function wrapper () { // test.js
 			            html += "<td colspan='2'>deep space</td>";
 		            html += "</tr>";
 		        }
-	            html += "<tr><td>Neutronium:</td><td>&nbsp;" + gsv(ship.neutronium) + "/" + hull.fueltank + " </td><td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td></tr>";
-	            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td><td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
-	            html += "<tr><td>Tritanium:</td><td>&nbsp;" + gsv(ship.tritanium) + "</td><td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr>";
-	            html += "<tr><td>Molybdenum:</td><td>&nbsp;" + gsv(ship.molybdenum) + "</td>";
+	            if (localStorage.showCargoOnCombat == "true" || (ship.torps == 0 && ship.bays == 0 && ship.beams == 0)) {
+		            html += "<tr><td>Neutronium:</td><td>&nbsp;" + gsv(ship.neutronium) + "/" + hull.fueltank + " </td><td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td></tr>";
+		            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td><td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
+		            html += "<tr><td>Tritanium:</td><td>&nbsp;" + gsv(ship.tritanium) + "</td><td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr>";
+		            html += "<tr><td>Molybdenum:</td><td>&nbsp;" + gsv(ship.molybdenum) + "</td>";
+	            }
 	            if (ship.torps > 0 || ship.bays > 0) {
 	                var ammoText = "&nbsp;Fighters";
 	                if (ship.torps > 0)
@@ -255,7 +298,7 @@ function wrapper () { // test.js
 	                html += "<td>" + ammoText + ": </td><td>&nbsp;" + gsv(ship.ammo) + "</td></tr>";
 	            }
 	            
-	            html += this.hitText(hit, hit.isPlanet).replace("&nbsp", "");
+	            html += this.hitText(hit, hit.isPlanet);
 	            html += "</table>";
 	        } else { //enemy
 	            var player = vgap.getPlayer(ship.ownerid);
@@ -270,7 +313,7 @@ function wrapper () { // test.js
 	            html += "<tr><td>Mass: </td><td>&nbsp;" + gsv(ship.mass) + "</td></tr>";
 	            html += "<tr><td colspan='2'>" + race.name + " (" + player.username + ")" + "</td></tr>";
 	            //html += "<tr><td>Neutronium:</td><td>?/" + hull.fueltank + " </td><td>&nbsp;Total Cargo:</td><td>?/" + hull.cargo + "</td></tr>";
-	            html += this.hitText(hit, hit.isPlanet).replace("&nbsp", "");
+	            html += this.hitText(hit, hit.isPlanet);
 	            html += "</table>";
 	            html += "</div>";
 	        }
@@ -335,116 +378,43 @@ function wrapper () { // test.js
 	    return false;
 	};
 	
-	vgapMap.prototype.nativeTaxAmount = function (planet)		// taken from vgap planet screen because it uses an undefined this when I need it
-	{
-		var a = planet.nativetaxrate;
-		var b = vgap.getPlayer(planet.ownerid);
-		if (b != null) 
-			if (b.raceid == 6 && a > 20) 
-				a = 20;
-
-		var e = Math.round(a * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
-		if (e > planet.clans) 
-			e = planet.clans;
-
-		var d = 1;
-		if (vgap.advActive(2)) 
-			d = 2;
-
-		e = e * d;
-		if (planet.nativetype == 6) 
-			e = e * 2;
-
-		if (e > 5000) 
-			e = 5000;
-
-		return e;
-	};
-
 	vgapMap.prototype.randomizeFC = function()	// random meaningless FC
 	{
-		var c = { "stroke-width": 2, "stroke-opacity": 1 };
-		
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
-			if (planet.readystatus == 0) {
-		        var g = vgap.map.screenX(planet.x);
-		        var h = vgap.map.screenY(planet.y);
-				var b = Math.random() * 750 + 250;
-				b = Math.floor(b);
-				planet.friendlycode = b.toString();
-				planet.changed = 1;
-				c["stroke"] = "red";
-				this.explosions.push(this.paper.circle(g, h, 10 * this.zoom).attr(c));
-				vgap.save();
-			}
+			var b = /att/i;
+			var c = /nuk/i;
+			if (!b.match(planet.friendlycode) && !c.match(planet.friendlycode))
+				vgap.map.randFC(planet);
 		}
 		
 		for (var i = 0; i < vgap.myships.length; i++) {
 			var ship = vgap.myships[i];
-			if (ship.readystatus == 0) {
-		        var g = vgap.map.screenX(ship.x);
-		        var h = vgap.map.screenY(ship.y);
-				var b = Math.random() * 750 + 250;
-				b = Math.floor(b);
-				ship.friendlycode = b.toString();
-				ship.changed = 1;
-				c["stroke"] = "orange";
-				this.explosions.push(this.paper.circle(g, h, 13 * this.zoom).attr(c));
-				vgap.save();
-			}
+			vgap.map.randFC(ship);
 		}
+	};
+	
+	vgapMap.prototype.randFC = function(i) {
 		
-//		vgap.map.savePlanets();
-//		vgap.map.saveShips();
+		if (i.readystatus == 0) {
+			var c = { stroke:"orange", "stroke-width": 2, "stroke-opacity": 1 };
+	        var g = vgap.map.screenX(i.x);
+	        var h = vgap.map.screenY(i.y);
+			var b = Math.random() * 750 + 250;
+			b = Math.floor(b);
+			i.friendlycode = b.toString();
+			i.changed = 1;
+			var r = 13;
+			if (i.isPlanet !== undefined && i.isPlanet == true)
+				r -= 3;
+			this.explosions.push(this.paper.circle(g, h, r * this.zoom).attr(c));
+			vgap.save();
+		}
 	};
 	
 	vgapMap.prototype.mining = function(planet, percent, inground) {
 		var rate = vgap.miningRate(planet, percent);
 	    return Math.min(inground, rate);
-	};
-	
-	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
-	{
-		var e = 0;
-		if (planet.nativeclans > 0) {
-			var a = planet.nativetaxrate;
-			var b = vgap.getPlayer(planet.ownerid);
-			if (b != null) 
-				if (b.raceid == 6 && a > 20) 
-					a = 20;
-	
-			e = Math.round(a * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
-			if (e > planet.clans) 
-				e = planet.clans;
-	
-			var d = 1;
-			if (vgap.advActive(2)) 
-				d = 2;
-	
-			e = e * d;
-			if (planet.nativetype == 6) 
-				e = e * 2;
-	
-			if (e > 5000) 
-				e = 5000;
-		}
-		
-		return e;
-	};
-	
-	vgapMap.prototype.colonistTaxAmount = function(planet)	// taken from vgap screen because it uses an undefined this when I need it
-	{
-		var a = Math.round(planet.colonisttaxrate * planet.clans / 1000);
-		var b = 1;
-		if (vgap.advActive(2)) {
-			b = 2;
-		}
-		a = a * b;
-		if (a > 5000) {
-			a = 5000;
-		}
-		return a;
 	};
 
 	vgapMap.prototype.maxBuildings = function (planet, min)		// taken from vgap screen because it uses an undefined this when I need it
@@ -549,45 +519,53 @@ function wrapper () { // test.js
 	{
 		for (var i = 0; i < vgap.notes.length; i++) {
 			var note = vgap.notes[i];
+			if (note.body == "")
+				continue;
+			
 			switch (note.targettype) {
 			case 1: // planet
+//				{"tax-happy":"70","nattax":"20",
+//				 "build":[{"defenses":"20","factories":"20","mines":"20"},
+//					      {"factories":"60","mines":"60","defenses":"60"}]}
+
 				var planet = vgap.getPlanet(note.targetid);
 				
 				if (planet && planet.ownerid == vgap.player.id ) {
-					var built = 0;
 					var body = note.body;
-					body = body.toString();
-					var found = body.match(/[a-z]+:\d*/ig);			// note can contain commands in any order and multiple copies of each like:
-																	// factories:50<cr>defense:50<cr>factories:100<cr>mines:100<cr>defense:100<cr>factories:999
-																	// 999 just keeps building to max
+					var jn = JSON.parse(body);
 					
-					for(var j=0; found != null && j<found.length; ++j) {	
-						var ex = found[j].toString();
-						var build = ex.match(/\d+/);
-						build = Number(build);
-
-						if (ex.match(/factories:/i) && planet.defense >= 20) 	// build factories based on planet notes "factories:xxx"
-							built += vgap.map.buildFactories(planet, build);
-
-						if (ex.match(/mines:/i) && planet.defense >= 20) 		// build mines based on planet notes "mines:xxx"
-							built += vgap.map.buildMines(planet, build);
-
-						if (ex.match(/defense:/i)) 							// build defense based on planet notes "defense:xxx"
-							built += vgap.map.buildDefense(planet, build);	
-
-						if (ex.match(/done:/i)) {								// no more building so just set ready
-					        var g = vgap.map.screenX(planet.x);
-					        var h = vgap.map.screenY(planet.y);
-							++built;
-							this.explosions.push(this.paper.circle(g, h, 40 * this.zoom).attr({ stroke: "yellow", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
+					if (jn["tax-happy"] != undefined) {		// keep happyponts here
+					}
+					if (jn["tax-growth"] != undefined) {	// maxamize growth let happypoints go to 100 then tax to 70 (default)
+					}
+					if (jn["nattax-happy"] != undefined) {	// keep happyponts here 70 (default) 30 for Borg
+					}
+					if (jn["nattax-growth"] != undefined) {	// maxamize growth let happypoints go to 100 then tax to 70
+					}
+					if (jn["build"] != undefined) {
+						var built = 0;
+						for (var i=0; i<jn["build"].length && built == 0; ++i) {
+							var b = jn["build"][i];				// builds f 15, d 20, f 60, m 60, f 100, m 100, d 100 by default
+	
+							if (b["factories"] != undefined) 
+								built += vgap.map.buildFactories(planet, Number(b["factories"]));
+							
+							if (b["mines"] != undefined) 
+								built += vgap.map.buildMines(planet, Number(b["mines"]));
+							
+							if (b["defenses"] != undefined) 
+								built += vgap.map.buildDefenses(planet, Number(b["defenses"]));
 						}
 					}
+
+					planet.redystatus = 1;
+					planet.changed = 1;
+					vgap.save();
+
+					var x = this.screenX(planet.x);
+					var y = this.screenY(planet.y);
+					this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 					
-					if (built > 0) {
-						planet.readystatus = 1;
-						planet.changed = 1;
-						vgap.map.savePlanet(planet);
-					}
 				}
 				break;
 				

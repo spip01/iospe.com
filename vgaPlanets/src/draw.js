@@ -128,7 +128,7 @@ function wrapper () { // draw.js
         this.starbases = this.paper.set();
 	    
         var G = Math.min(24, Math.max(6 * this.zoom, 3));
-	    var a = {stroke:"white", "stroke-width":1, "stroke-opacity":.75};
+	    var a = {stroke:"white", "stroke-width":1, "stroke-opacity":1};
         
 	   	for (var n=0; n<vgap.starbases.length; ++n) {
     		var starbase = vgap.starbases[n];
@@ -150,21 +150,41 @@ function wrapper () { // draw.js
 		if (this.ships !== undefined)
 	        this.ships.remove();
         this.ships = this.paper.set();
-	    
-        var G = Math.min(24, Math.max(6 * this.zoom, 3));
         
     	for (var i = 0; i < vgap.ships.length; ++i) {
     		var ship = vgap.ships[i];
+    		ship.drawn = false;
+    	}
+    	
+        var g = Math.min(24, Math.max(6 * this.zoom, 3));
+        
+    	for (var i = 0; i < vgap.ships.length; ++i) {
+    		var ship = vgap.ships[i];
+    		if (ship.drawn)
+    			continue;
+    		
 			var x = this.screenX(ship.x);
 			var y = this.screenY(ship.y);
 			
     		var l = vgap.shipMap[ship.x+","+ship.y];
+    		var p = vgap.planetMap[ship.x+","+ship.y];
+    		
+    		if (p != undefined)
+    			G = g;
+			else
+				G = 6 * this.zoom;
     		
 			for (var k=0; k<l.length; ++k) {
 			    var s = l[k];
-			    var c = this.getColors(s.ownerid);
-    			var r = vgap.map.paper.rect(x, y, G, G).attr({fill:c.start});
-    			this.ships.push(r.transform("r"+k*45+"t"+G+",0"));
+			    s.drawn = true;
+				var c = this.getColors(s.ownerid);
+				c = { fill:c.start };
+			    if (s.beams == 0 && s.torps == 0 && s.bays == 0)
+			    	c["fill-opacity"] = .5;
+			    else
+			    	c["fill-opacity"] = 1;
+    			var r = vgap.map.paper.rect(x, y, g, g).attr(c);
+    			this.ships.push(r.transform("r"+k*60+"t"+G+",0"));
 			}
     	}
     };
@@ -276,7 +296,6 @@ function wrapper () { // draw.js
 		if (this.minefields !== undefined)
 	        this.minefields.remove();
         this.minefields = this.paper.set();
-	    
 
     	for (var c = 0; c < vgap.minefields.length; c++) {
             var d = vgap.minefields[c];
