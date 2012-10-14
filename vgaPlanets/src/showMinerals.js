@@ -24,6 +24,7 @@ function wrapper () { // showMinerals.js
         	vgap.map.mineralsShow.sup = false;
         	vgap.map.mineralsShow.cre = false;
         	vgap.map.mineralsShow.gnd = false;
+        	vgap.map.mineralsShow.col = false;
         }
         
         vgap.map.buildMineralsControl();
@@ -63,7 +64,8 @@ function wrapper () { // showMinerals.js
 		b +=     "<td style='color:#b401c9'><input id='dur' type='checkbox'" + (vgap.map.mineralsShow.dur ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Duranium</td>";
 		b +=     "<td style='color:#2c55fc'><input id='tri' type='checkbox'" + (vgap.map.mineralsShow.tri ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Tritanium</td>";
 		b +=     "<td style='color:#05db9d'><input id='mol' type='checkbox'" + (vgap.map.mineralsShow.mol ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Molybdenum</td></tr>";
-		b += "<tr><td colspan=2><input id='gnd' type='checkbox'" + (vgap.map.mineralsShow.gnd ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Include Ground</td>";
+		b += "<tr><td><input id='gnd' type='checkbox'" + (vgap.map.mineralsShow.gnd ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;In Ground</td>";
+		b += 	 "<td><input id='col' type='checkbox'" + (vgap.map.mineralsShow.col ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Colonist</td>";
 		b += 	 "<td style='color:#6df51b'><input id='sup' type='checkbox'" + (vgap.map.mineralsShow.sup ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Supplies</td>";
 		b +=     "<td style='color:#ea850e'><input id='cre' type='checkbox'" + (vgap.map.mineralsShow.cre ? "checked='true'" : "") + "onchange='vgap.map.displayMinerals()'/>&nbsp;&nbsp;Credits</td></tr></table></div>";
 		
@@ -84,24 +86,30 @@ function wrapper () { // showMinerals.js
 	    
 	    vgap.deselectAll();
 	    
-	    for (var i=0; i < vgap.myplanets.length; ++i) {
-			var planet = vgap.myplanets[i];
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
-			
-	        if (vgap.map.mineralsShow.neu)
-	        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundneutronium : 0) + planet.neutronium, "#fe403f");
-	        if (vgap.map.mineralsShow.dur)
-	        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundduranium : 0) + planet.duranium, "#b401c9");
-	        if (vgap.map.mineralsShow.tri)
-	        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundtritanium : 0) + planet.tritanium, "#2c55fc");
-	        if (vgap.map.mineralsShow.mol)
-	        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundmolybdenum : 0) + planet.molybdenum, "#05db9d");
-	        if (vgap.map.mineralsShow.sup)
-	        	vgap.map.displayMin(g, h, planet.supplies, "#6df51b");
-	        if (vgap.map.mineralsShow.cre)
-	        	vgap.map.displayMin(g, h, planet.megacredits, "#ea850e");
-	        
+	    for (var i=0; i < vgap.planets.length; ++i) {
+			var planet = vgap.planets[i];
+			if (planet.infoturn > 0) {
+		        var g = vgap.map.screenX(planet.x);
+		        var h = vgap.map.screenY(planet.y);
+				
+		        if (vgap.map.mineralsShow.neu)
+		        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundneutronium : 0) + planet.neutronium, "#fe403f");
+		        if (vgap.map.mineralsShow.dur)
+		        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundduranium : 0) + planet.duranium, "#b401c9");
+		        if (vgap.map.mineralsShow.tri)
+		        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundtritanium : 0) + planet.tritanium, "#2c55fc");
+		        if (vgap.map.mineralsShow.mol)
+		        	vgap.map.displayMin(g, h, (vgap.map.mineralsShow.gnd ? planet.groundmolybdenum : 0) + planet.molybdenum, "#05db9d");
+		        if (vgap.map.mineralsShow.sup)
+		        	vgap.map.displayMin(g, h, planet.supplies, "#6df51b");
+		        if (vgap.map.mineralsShow.cre)
+		        	vgap.map.displayMin(g, h, planet.megacredits, "#ea850e");
+		        if (vgap.map.mineralsShow.col) {
+		        	vgap.map.displayCol(g, h, planet.clans, "#ffffff");
+		        	vgap.map.displayCol(g, h, planet.nativeclans, "#808080");
+		        	vgap.map.displayTemp(g, h, planet.temp);
+		        }
+			}
 	    }
 	    
 	    for (var i=0; i < vgap.myships.length; ++i) {
@@ -129,7 +137,26 @@ function wrapper () { // showMinerals.js
 		if (amt > 10) {
 			var c = { "stroke-width": 2, "stroke-opacity": 1, stroke:col };
 			this.special.push(this.paper.circle(g, h, amt * this.zoom).attr(c));
-		}
+    	}
+	};
+	
+    vgapMap.prototype.displayCol = function(g, h, amt, col) {
+    	if (amt != 0) {
+			amt = Math.log(amt) + 12;
+			var c = { "stroke-width": 2, "stroke-opacity": 1, stroke:col };
+			this.special.push(this.paper.circle(g, h, amt * this.zoom).attr(c));
+    	}
+	};
+	
+    vgapMap.prototype.displayTemp = function(g, h, temp) {
+    	if (temp > 0) {
+			var c = { "stroke-width": 3, "stroke-opacity": 1, stroke:"green" };
+			if (temp > 84)
+				c.stroke = "red";
+			if (temp < 15)
+				c.stroke = "blue";
+			this.special.push(this.paper.circle(g, h, 9 * this.zoom).attr(c));
+    	}
 	};
 	
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
