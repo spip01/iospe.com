@@ -5,7 +5,7 @@
 // @include       http://planets.nu/games/*
 // @include       http://play.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-show-minerals-checkboxes
-// @version 1.0
+// @version 1.1
 // ==/UserScript==
 
 function wrapper () { // showMinerals.js
