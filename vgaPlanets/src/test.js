@@ -15,26 +15,27 @@ function wrapper () { // test.js
 		oldLoadControls.apply(this, arguments);
            
         var b = "";
-        b += "<li onclick='vgap.map.setComplete();'>Set Complete</li>";
+        b += "<li onclick='vgap.map.execNotes();'>exec Notes</li>";
+        b += "<li onclick='vgap.map.useNotes(false);'>find Default Notes</li>";
         
         $("#MapTools li:contains('Clear')").before(b);
         
         localStorage.showCargoOnCombat = "false";
         
-        vgap.map.findDefaultNote();
+        vgap.map.useNotes(false);	// find defaults
 	};
     		
-	vgapMap.prototype.setComplete = function () {
+	vgapMap.prototype.execNotes = function () {
 		if (vgap.myPlanetDefault != undefined)
-			for (var i = 0; i < vgap.myplanets.length; i++) {
-				var planet = vgap.myplanets[i];
-				vgap.map.execPlanetNote(vgap.myPlanetDefault, planet);
-			}
+			for (var i = 0; i < vgap.myplanets.length; i++) 
+				vgap.map.execPlanetNote(vgap.myPlanetDefault, vgap.myplanets[i]);
+		
+		vgap.map.useNotes(true);
 	};
 
 	vgapMap.prototype.setColonistTaxHappy = function (planet, happy) {
 		var tax = vgap.map.colonistTaxAmount(planet);
-		planet.colhappychange = happy - planet.nativehappypoints;
+		planet.colhappychange = happy - planet.colhappypoints;
 		planet.colonisttaxrate = vgap.map.colonistTaxRateFHappy(planet);
 		
 		if (tax != vgap.map.colonistTaxAmount(planet)) 
@@ -119,14 +120,27 @@ function wrapper () { // test.js
 	};
 
 	
-	vgapMap.prototype.randFC = function(i) {
-		var b = /att/i;
-		var c = /nuk/i;
-		if (!b.match(i.friendlycode) && !c.match(i.friendlycode)) {
+	vgapMap.prototype.setFC = function(p, fc) {
+		if (fc.keep != undefined) {
+			for (var i=0; i<fc.keep.length; ++i)
+				if (p.friendlycode.match("/"+fc.keep+"/i"))
+					return;
+		}
+		else if (fc["set"] != undefined) {
+			if (fc["set"].match(/defense/i)) {
+				for (var i in fc["set"].defense)
+					if (p.defense >= fc["set"].defense[i])
+						p.friendlycode = i;
+			}
+			else if (fc["set"].match(/random/i)) {
 			var r = Math.random() * 750 + 250;
 			r = Math.floor(r);
-			i.friendlycode = r.toString();
-			i.changed = 1;
+				p.friendlycode = r.toString();
+			}
+			else
+				p.friendlycode = fc["set"];
+
+			p.changed = 1;
 		}
 	};
 	
@@ -161,16 +175,12 @@ function wrapper () { // test.js
 		var build = 0;
 		
 		if (planet.factories < count) {	
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 100);
 			build = Math.min(count - planet.factories, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 4), 
 					max - planet.factories);			// maximum number of factories we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 31 * this.zoom).attr({ stroke: "green", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
-
 				planet.builtfactories += build;
 				planet.factories += build;
 				planet.supplies -= build;
@@ -183,20 +193,16 @@ function wrapper () { // test.js
 		return build;
 	};
 
-	vgapMap.prototype.buildDefense = function (planet, count)
+	vgapMap.prototype.buildDefenses = function (planet, count)
 	{
 		var build = 0;
 		if (planet.defense < count) {	            
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 50);
 			build = Math.min(count - planet.defense, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 11), 
 					max - planet.defense);			// maximum number we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 34 * this.zoom).attr({ stroke: "blue", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
-
 				planet.builtdefense += build;
 				planet.defense += build;
 				planet.supplies -= build;
@@ -212,16 +218,12 @@ function wrapper () { // test.js
 	{
 		var build = 0;
 		if (planet.mines < count) {	
-	        var g = vgap.map.screenX(planet.x);
-	        var h = vgap.map.screenY(planet.y);
 			var max = vgap.map.maxBuildings(planet, 200);
 			build = Math.min(count - planet.mines, planet.supplies, 
 					Math.floor((planet.supplies + planet.megacredits) / 5), 
 					max - planet.mines);				// maximum number of factories we can build
 
 			if (build > 0) {
-				this.explosions.push(this.paper.circle(g, h, 37 * this.zoom).attr({ stroke: "purple", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 }));
-
 				planet.builtmines += build;
 				planet.mines += build;
 				planet.supplies -= build;
@@ -233,46 +235,11 @@ function wrapper () { // test.js
 		return build;
 	};
 
-	vgapMap.prototype.findDefaultNote = function () {
-		var foundPlanetDefault = false;
+	vgapMap.prototype.useNotes = function (use) {
 
-		for (var i = 0; i < vgap.notes.length; i++) {
-			var note = vgap.notes[i];
-			if (note.body == "")
-				continue;
-			
-			switch (note.targettype) {
-			case 1: // planet
-//				"default":
-//				{"tax-happy":"70","nattax":"20",
-//				 "build":[{"defenses":"20","factories":"20","mines":"20"},
-//					      {"factories":"60","mines":"60","defenses":"60"}]}
-				if (foundPlanetDefault)
-					continue;
-				
-				var planet = vgap.getPlanet(note.targetid);
-				
-				if (planet && planet.ownerid == vgap.player.id ) {
-					var body = note.body;
-					var jn = JSON.parse(body);
-					if (jn["default"] != undefined) {
-						vgap.myPlanetDefault = jn["default"];
-						foundPlanetDefault = true;
-						continue;
-					}
-				}
-				break;
-			case 2: // ship 
-				break;
-			case 3: // starbase 
-				break;
-			}
-		}
-	};
-	
-	vgapMap.prototype.useNotes = function () 
-	{
-		for (var i = 0; i < vgap.notes.length; i++) {
+		var findPlanetDefault = false;
+		
+		for (var i = 0; i < vgap.notes.length && (use || !findPlanetDefault); i++) {
 			var note = vgap.notes[i];
 			var body = note.body;
 			
@@ -281,12 +248,21 @@ function wrapper () { // test.js
 				var planet = vgap.getPlanet(note.targetid);
 				
 				if (planet && planet.ownerid == vgap.player.id ) {
-					try {
-						JSON.parse(body, function(jn, planet) {
+                    try {
+					var jn = JSON.parse(body);
+                        if (!use) {
+					if (jn["default"] != undefined) {
+	                            jn = jn["default"];
+	                            vgap.myPlanetDefault = jn;
+	                            findPlanetDefault = true;
+	                        }
+						continue;
+					}
+	
 							vgap.map.execPlanetNote(jn, planet);
-						});
 					}
 					catch (e) {
+						console.log(e);
 						continue;
 					}
 				}
@@ -300,55 +276,52 @@ function wrapper () { // test.js
 	};
 
 	vgapMap.prototype.execPlanetNote = function (jn, planet) {
-//		"tax-happy":"70","nattax-happy":"70",
-//		 "build":[{"defenses":"20","factories":"20","mines":"20"},
-//			      {"factories":"60","mines":"60","defenses":"60"}]
+        var g = vgap.map.screenX(planet.x);
+        var h = vgap.map.screenY(planet.y);
 
 		if (jn["tax-happy"] != undefined) {
-			vgap.map.setColTaxHappy(planet, Number(jn["tax-happy"]));
+			vgap.map.setColonistTaxHappy(planet, Number(jn["tax-happy"]));
 		}
 		
 		if (jn["tax-growth"] != undefined) {
 			if (planet.happypoints >= 90)
-				vgap.map.setColTaxHappy(planet, 70);
+				vgap.map.setColonistTaxHappy(planet, 70);
 			else
-				vgap.map.setColTaxRate(planet, 0);
+				vgap.map.setColonistTaxRate(planet, 0);
 		}
 		
 		if (jn["nattax-happy"] != undefined) {
 			vgap.map.setNativeTaxHappy(planet, Number(jn["nattax-happy"]));
 		}
 		
-		if (jn["friendlycode"] != undefined) {
-			var rnd = /random/i;
-			if (rnd.match(jn["friendlycode"]))
-				vgap.map.randFC(planet);
-		}
+		if (jn.friendlycode != undefined) 
+			vgap.map.setFC(planet, jn.friendlycode);
 		
-		if (jn["build"] != undefined) {
+		if (jn.build != undefined) {
 			var built = 0;
-			for (var i=0; i<jn["build"].length && built == 0; ++i) {
-				var b = jn["build"][i];
+			for (var i=0; i<jn.build.length && built == 0; ++i) {
+				var b = jn.build[i];
 
-				if (b["factories"] != undefined) 
-					built += vgap.map.buildFactories(planet, Number(b["factories"]));
+				if (b.factories != undefined) 
+					built += vgap.map.buildFactories(planet, Number(b.factories));
 				
-				if (b["mines"] != undefined) 
-					built += vgap.map.buildMines(planet, Number(b["mines"]));
+				if (b.mines != undefined) 
+					built += vgap.map.buildMines(planet,  Number(b.mines));
 				
-				if (b["defenses"] != undefined) 
-					built += vgap.map.buildDefenses(planet, Number(b["defenses"]));
+				if (b.defenses != undefined) 
+					built += vgap.map.buildDefenses(planet,  Number(b.defenses));
+			}
+			
+			if (built > 0) {
+				planet.readystatus = 1;
+				this.explosions.push(this.paper.circle(g, h, 16 * this.zoom).attr({stroke: "orange", "stroke-width": 4 * this.zoom,"stroke-opacity": 1}));
 			}
 		}
 
-		planet.redystatus = 1;
-		planet.changed = 1;
+		if (planet.changed > 0) {
 		vgap.save();
-
-		var x = this.screenX(planet.x);
-		var y = this.screenY(planet.y);
-		this.explosions.push(this.drawCircle(x, y, 20 * this.zoom, { stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
-
+			this.explosions.push(this.paper.circle(g, h, 12 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+		}
 	};
 	
 	vgapMap.prototype.hitTextBox = function(hit) {
