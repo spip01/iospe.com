@@ -51,7 +51,7 @@ function wrapper () { // hitText.js
 	                var race = vgap.getRace(player.raceid);
 	                txt += "<tr><td colspan='4'>" + race.name + " (" + player.username + ")</td></tr>";
 	            }
-	            txt += this.hitText(hit, hit.isPlanet);
+	            //txt += this.hitText(hit, hit.isPlanet);
 	            var starbase;
 	            if (starbase = vgap.getStarbase(hit.id)) {
 	    	        txt += "<tr><td class='WarnText'>Starbase</td>";
@@ -91,12 +91,23 @@ function wrapper () { // hitText.js
 			            html += "<td colspan='2'>deep space</td>";
 		            html += "</tr>";
 		        }
-	            if (localStorage.showCargoOnCombat == "true" || (ship.torps == 0 && ship.bays == 0 && ship.beams == 0)) {
-		            html += "<tr><td>Neutronium:</td><td>&nbsp;" + gsv(ship.neutronium) + "/" + hull.fueltank + " </td><td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td></tr>";
-		            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td><td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
-		            html += "<tr><td>Tritanium:</td><td>&nbsp;" + gsv(ship.tritanium) + "</td><td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr>";
+	            
+		        html += "<tr><td>Neutronium:</td><td>&nbsp;" + gsv(ship.neutronium) + "/" + hull.fueltank + " </td>";
+	            if (ship.clans != 0)
+		            html += "<td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td>";
+	            html += "</tr>"
+	            if (ship.duranium + ship.tritanium + ship.molybdenum > 0) {
+		            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td>";
+		            html += "<td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
+		            html += "<tr><td>Tritanium:</td><td>&nbsp;" + gsv(ship.tritanium) + "</td>";
+		            html += "<td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr>";
 		            html += "<tr><td>Molybdenum:</td><td>&nbsp;" + gsv(ship.molybdenum) + "</td>";
 	            }
+	            else if (ship.supplies + ship.megacredits > 0) {
+		            html += "<tr><td>Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td>";
+		            html += "<td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr><tr>";
+	            }
+	            
 	            if (ship.torps > 0 || ship.bays > 0) {
 	                var ammoText = "&nbsp;Fighters";
 	                if (ship.torps > 0)
@@ -104,7 +115,7 @@ function wrapper () { // hitText.js
 	                html += "<td>" + ammoText + ": </td><td>&nbsp;" + gsv(ship.ammo) + "</td></tr>";
 	            }
 	            
-	            html += this.hitText(hit, hit.isPlanet);
+	            //html += this.hitText(hit, hit.isPlanet);
 	            html += "</table>";
 	        } else { //enemy
 	            var player = vgap.getPlayer(ship.ownerid);
@@ -119,7 +130,7 @@ function wrapper () { // hitText.js
 	            html += "<tr><td>Mass: </td><td>&nbsp;" + gsv(ship.mass) + "</td></tr>";
 	            html += "<tr><td colspan='2'>" + race.name + " (" + player.username + ")" + "</td></tr>";
 	            //html += "<tr><td>Neutronium:</td><td>?/" + hull.fueltank + " </td><td>&nbsp;Total Cargo:</td><td>?/" + hull.cargo + "</td></tr>";
-	            html += this.hitText(hit, hit.isPlanet);
+	            //html += this.hitText(hit, hit.isPlanet);
 	            html += "</table>";
 	            html += "</div>";
 	        }

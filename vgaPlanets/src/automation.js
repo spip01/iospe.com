@@ -28,6 +28,9 @@ function wrapper () { // automation.js
 
 		for (var i = 0; i < vgap.myplanets.length; i++) 
 			vgap.map.execPlanetNote(vgap.myplanets[i]);
+
+		for (var i = 0; i < vgap.myships.length; i++) 
+			vgap.map.execShipNote(vgap.myships[i]);
 	};
 
 	vgapMap.prototype.setColonistTaxHappy = function (planet, happy) {
@@ -38,7 +41,7 @@ function wrapper () { // automation.js
 		if (newtax > 0) {
 			if (tax != newtax) {
 				planet.changed = 1;
-				console.log(planet.id+" col tax "+planet.nativetaxrate);
+				//console.log(planet.id+" col tax "+planet.nativetaxrate);
 			}
 		}
 		else
@@ -86,7 +89,7 @@ function wrapper () { // automation.js
 		
 		if (tax != planet.nativetaxvalue) {
 			planet.changed = 1;
-			console.log(planet.id+" nat tax "+planet.nativetaxrate);
+			//console.log(planet.id+" nat tax "+planet.nativetaxrate);
 		}
 	};
 
@@ -137,33 +140,32 @@ function wrapper () { // automation.js
 		return a;
 	};
 
-	
-	vgapMap.prototype.setFC = function(p, fc) {
-		if (fc.keep != undefined) {
-			for (var i=0; i<fc.keep.length; ++i)
-				if (p.friendlycode.match("/"+fc.keep+"/i"))
-					return;
-		}
-		else if (fc["set"] != undefined) {
-			if (fc["set"].match(/defense/i)) {
-				for (var i in fc["set"].defense)
-					if (p.defense >= fc["set"].defense[i]) {
-						p.friendlycode = i;
-						console.log(p.id+" FC "+p.friendlycode);
-					}
-			}
-			else if (fc["set"].match(/random/i)) {
-				var r = Math.random() * 750 + 250;
-				r = Math.floor(r);
-				p.friendlycode = r.toString();
-				console.log(p.id+" FC "+p.friendlycode);
-			}
-			else
-				p.friendlycode = fc["set"];
-
-			p.changed = 1;
-		}
-	};
+    vgapMap.prototype.setFC = function(p, fc) {
+        if (fc.keep != undefined) {
+            for (var i = 0; i < fc.keep.length; ++i)
+                if (p.friendlycode.match("/" + fc.keep + "/i"))
+                    return;
+        } 
+        else if (fc.set != undefined) {
+        	fc = fc.set;
+        	
+            if (p.isPlanet && fc.defense != undefined) {
+                for (var i in fc.defense)
+                    if (p.defense >= fc.defense[i]) {
+                        p.friendlycode = i;
+                        //console.log(p.id + " FC " + p.friendlycode);
+                    }
+            } 
+            else if (fc.random != undefined) {
+                var r = Math.random() * 750 + 250;
+                r = Math.floor(r);
+                p.friendlycode = r.toString();
+                //console.log(p.id + " FC " + p.friendlycode);
+            } 
+            
+            p.changed = 1;
+        }
+    };
 	
 	vgapMap.prototype.mining = function(planet, percent, inground) {
 		var rate = vgap.miningRate(planet, percent);
@@ -209,7 +211,7 @@ function wrapper () { // automation.js
 				vgap.map.spendMC(planet, 3 * build);	// deduct supplies & MC
 				planet.changed = 1;
 				
-				console.log(planet.id+" factories "+build);
+				//console.log(planet.id+" factories "+build);
 			}
 		}
 
@@ -232,7 +234,7 @@ function wrapper () { // automation.js
 
 				vgap.map.spendMC(planet, 10  * build);
 				planet.changed = 1;
-				console.log(planet.id+" defense "+build);
+				//console.log(planet.id+" defense "+build);
 			}
 		}
 		return build;
@@ -254,60 +256,97 @@ function wrapper () { // automation.js
 
 				vgap.map.spendMC(planet, 4 * build);
 				planet.changed = 1;
-				console.log(planet.id+" mines "+build);
+				//console.log(planet.id+" mines "+build);
 			}
 		}
 		return build;
 	};
 
 	vgapMap.prototype.findNotes = function () {
+		var jn = {};
 		
 		for (var i = 0; i < vgap.notes.length; i++) {
 			var note = vgap.notes[i];
 			var body = note.body;
 			
+            try {
+            	jn = JSON.parse(body);
+            } 
+			catch (e) {
+				console.log(e);
+				continue;
+			}
+			
 			switch (note.targettype) {
-			case 1: // planet
-				var planet = vgap.getPlanet(note.targetid);
-				
-				if (planet && planet.ownerid == vgap.player.id ) {
-                    try {
-                        var jn = JSON.parse(body);
-
-                        if (jn["default"] != undefined) {
-                            vgap.notesPlanetDefault = jn["default"];
+            case 1: // planet
+                var planet = vgap.getPlanet(note.targetid);
+                
+                if (planet && planet.ownerid == vgap.player.id) {
+                    if (jn["default"] != undefined) {
+                        if (jn["default"].planet != undefined) {
+                            vgap.notesPlanetDefault = jn["default"].planet;
                         }
-                        if (jn["planet"] != undefined) {
-                        	planet.notesDefault = jn["planet"];
-                        	console.log(planet.id+" non default");
+                        if (jn["default"].ship != undefined) {
+                            vgap.notesShipDefault = jn["default"].ship;
                         }
-                    } 
-					catch (e) {
-						console.log(e);
-						continue;
-					}
-				}
-				break;
-			case 2: // ship 
-				break;
+                    }
+                    if (jn.planet != undefined) {
+                        planet.notesDefault = jn.planet;
+                        //console.log(planet.id + " non default");
+                    }
+                }
+                break;
+            case 2: // ship 
+                var ship = vgap.getShip(note.targetid);
+                
+                if (ship && ship.ownerid == vgap.ship.id) {
+                    if (jn.ship != undefined) {
+                        ship.notesDefault = jn.ship;
+                        //console.log(ship.id + " non default");
+                    }
+                }
+                break;
 			case 3: // starbase 
 				break;
 			}
 		}
 	};
 
-	vgapMap.prototype.execPlanetNote = function (planet) {
+	vgapMap.prototype.execShipNote = function (ship) {
+        var g = vgap.map.screenX(ship.x);
+        var h = vgap.map.screenY(ship.y);
+	    var jn = {};
+	            
+        if (ship.notesDefault != undefined)
+        	jn = ship.notesDefault;
+        else if (vgap.notesShipDefault != undefined)
+        	jn = vgap.notesShipDefault;
+        else
+        	return;
+        
+		if (jn.friendlycode != undefined) 
+			vgap.map.setFC(ship, jn.friendlycode);
+		
+		if (ship.changed > 0) {
+			vgap.singleSave({ship:ship});
+			this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "brown", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+		}
+};
+	
+    vgapMap.prototype.execPlanetNote = function (planet) {
         var g = vgap.map.screenX(planet.x);
         var h = vgap.map.screenY(planet.y);
-	            
+	    var jn = {};
+	    
         if (planet.notesDefault != undefined)
         	jn = planet.notesDefault;
-        else
+        else if (vgap.notesPlanetDefault != undefined)
         	jn = vgap.notesPlanetDefault;
+        else
+        	return;
         
-		if (jn["tax-happy"] != undefined) {
+		if (jn["tax-happy"] != undefined) 
 			vgap.map.setColonistTaxHappy(planet, Number(jn["tax-happy"]));
-		}
 		
 		if (jn["tax-growth"] != undefined) {
 			if (planet.colonisthappypoints >= 90)
@@ -323,14 +362,18 @@ function wrapper () { // automation.js
 		if (jn.friendlycode != undefined) 
 			vgap.map.setFC(planet, jn.friendlycode);
 		
-		if (jn.build != undefined) {
+		if (planet.clans == 1 || Math.floor((planet.supplies + planet.megacredits) / 4) < 1) {
+			planet.readystatus = 1;
+			planet.changed = 1;
+		}
+		else if (jn.build != undefined) {
 			var built = 0;
 			for (var i=0; i<jn.build.length && built == 0; ++i) {
 				var b = jn.build[i];
 
 				if (b.done != undefined) {
-					b.changed = 1;
-					built = 1;
+					planet.changed = 1;
+					planet.readystatus = 1;
 					break;
 				}
 				
@@ -348,18 +391,13 @@ function wrapper () { // automation.js
 				planet.readystatus = 1;
 		}
 
-		if (planet.clans == 1) {
-			planet.readystatus = 1;
-			planet.changed = 1;
-		}
-		
 		if (planet.changed > 0) {
-			vgap.savePlanet(planet);
+			vgap.singleSave({planet:planet});
 			this.explosions.push(this.paper.circle(g, h, 10 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 		}
 	};
 
-	vgaPlanets.prototype.savePlanet = function(p) {
+	vgaPlanets.prototype.singleSave = function(save) {
         var b = new dataObject();
         b.add("gameid", this.gameId);
         b.add("playerid", this.player.id);
@@ -368,13 +406,30 @@ function wrapper () { // automation.js
         b.add("savekey", this.savekey);
         b.add("apikey", vgap.apikey);
         b.add("saveindex", 2);
-        b.add("Planet" + p.id, this.serializePlanet(p), false);
-        p.changed = 2;
-        b.add("keycount", 11);
+        var k = 10;
+        if (save.planet != undefined) {
+        	var planet = save.planet;
+	        b.add("Planet" + planet.id, this.serializePlanet(planet), false);
+	        planet.changed = 2;
+	        ++k;
+        }
+        if (save.ship != undefined) {
+        	var ship = save.ship;
+	        b.add("Ship" + ship.id, this.serializeShip(ship), false);
+	        ship.changed = 2;
+	        ++k;
+        }
+        b.add("keycount", k);
         this.saveInProgress = 2;
-        this.request("/game/save", b, function(f, p) {
-            if (f.success)
-            	p.changed = 0;
+        this.request("/game/save", b, function(f, save) {
+            if (f.success) {
+                if (save.planet != undefined) 
+	            	save.planet.changed = 0;
+                if (save.ship != undefined) 
+	            	save.ship.changed = 0;
+            }
+            else
+            	alert(f.error);
             this.saveInProgress = 0;
         });
     }; 

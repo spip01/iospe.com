@@ -42,6 +42,46 @@ function wrapper () { // showMinerals.js
         $("#MapTools li:contains('Clear')").replaceWith(b);
 	};
     	
+	var oldProcessLoad = vgaPlanets.prototype.processLoad;
+    vgaPlanets.prototype.processLoad = function(f) {
+    	
+    	oldProcessLoad.apply(this,arguments);
+    	
+    	if(typeof(Storage)!=="undefined") {
+	    	if (localStorage.showAlliedMinerals == undefined) {
+	    		localStorage.showAlliedMinerals = "false";
+	    	}
+    	}
+   };
+	
+	var oldShowSettings = vgapDashboard.prototype.showSettings;
+	vgapDashboard.prototype.showSettings = function () {
+
+		oldShowSettings.apply(this,arguments);
+   
+		var b = "<br><h3>Show Minerals</h3>";
+		
+		b += "<div id='showMineralsOptions'><table>";
+		b += "<tr><td><input id='showAlliedMinerals' type='checkbox'" + (localStorage.showAlliedMinerals == "true" ? "checked='true'" : "") + "/>";
+		b += 	 " Show Allied Minerals</td></tr>";
+
+		b += "</table></div>";
+   
+		$('[onclick="vgap.resetTurn();"]').after(b);
+		
+	    this.pane.jScrollPane();
+	};
+
+	var oldSaveSettings = vgapDashboard.prototype.saveSettings;
+	vgapDashboard.prototype.saveSettings = function() {
+		
+	    $("#showMineralsOptions :checkbox").each(function(a) {
+	        localStorage[$(this).attr("id")] = $(this).is(":checked");
+	    });
+    	
+		oldSaveSettings.apply(this,arguments);
+	};
+
 	vgapMap.prototype.hideMineralsCheck = function () {
 		vgap.map.mineralsControl.hide();
         vgap.deselectAll();
@@ -88,7 +128,7 @@ function wrapper () { // showMinerals.js
 	    
 	    for (var i=0; i < vgap.planets.length; ++i) {
 			var planet = vgap.planets[i];
-			if (planet.infoturn > 0) {
+			if (planet.infoturn > 0 && (localStorage.showAlliedMinerals == "true" || planet.ownerid == vgap.player.id || planet.ownerid == 0)) {
 		        var g = vgap.map.screenX(planet.x);
 		        var h = vgap.map.screenY(planet.y);
 				
@@ -117,18 +157,20 @@ function wrapper () { // showMinerals.js
 	        var g = vgap.map.screenX(ship.x);
 	        var h = vgap.map.screenY(ship.y);
 			
-	        if (vgap.map.mineralsShow.neu)
-	        	vgap.map.displayMin(g, h, ship.neutronium, "#fe403f");
-	        if (vgap.map.mineralsShow.dur)
-	        	vgap.map.displayMin(g, h, ship.duranium, "#b401c9");
-	        if (vgap.map.mineralsShow.tri)
-	        	vgap.map.displayMin(g, h, ship.tritanium, "#2c55fc");
-	        if (vgap.map.mineralsShow.mol)
-	        	vgap.map.displayMin(g, h, ship.molybdenum, "#05db9d");
-	        if (vgap.map.mineralsShow.sup)
-	        	vgap.map.displayMin(g, h, ship.supplies, "#6df51b");
-	        if (vgap.map.mineralsShow.cre)
-	        	vgap.map.displayMin(g, h, ship.megacredits, "#ea850e");
+			if (localStorage.showAlliedMinerals || ship.ownerid == vgap.player.id) {
+				if (vgap.map.mineralsShow.neu)
+		        	vgap.map.displayMin(g, h, ship.neutronium, "#fe403f");
+		        if (vgap.map.mineralsShow.dur)
+		        	vgap.map.displayMin(g, h, ship.duranium, "#b401c9");
+		        if (vgap.map.mineralsShow.tri)
+		        	vgap.map.displayMin(g, h, ship.tritanium, "#2c55fc");
+		        if (vgap.map.mineralsShow.mol)
+		        	vgap.map.displayMin(g, h, ship.molybdenum, "#05db9d");
+		        if (vgap.map.mineralsShow.sup)
+		        	vgap.map.displayMin(g, h, ship.supplies, "#6df51b");
+		        if (vgap.map.mineralsShow.cre)
+		        	vgap.map.displayMin(g, h, ship.megacredits, "#ea850e");
+			}
 	    }
 	};
 	        
@@ -142,7 +184,7 @@ function wrapper () { // showMinerals.js
 	
     vgapMap.prototype.displayCol = function(g, h, amt, col) {
     	if (amt != 0) {
-			amt = Math.log(amt) + 12;
+			amt = 3 * Math.log(amt) + 12;
 			var c = { "stroke-width": 2, "stroke-opacity": 1, stroke:col };
 			this.special.push(this.paper.circle(g, h, amt * this.zoom).attr(c));
     	}
