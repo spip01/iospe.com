@@ -95,7 +95,7 @@ function wrapper () { // hitText.js
 		        html += "<tr><td>Neutronium:</td><td>&nbsp;" + gsv(ship.neutronium) + "/" + hull.fueltank + " </td>";
 	            if (ship.clans != 0)
 		            html += "<td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td>";
-	            html += "</tr>"
+	            html += "</tr>";
 	            if (ship.duranium + ship.tritanium + ship.molybdenum > 0) {
 		            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td>";
 		            html += "<td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
@@ -193,6 +193,38 @@ function wrapper () { // hitText.js
 	            return c;
 	    }
 	    return false;
+	};
+
+	vgapMap.prototype.nativeTaxAmount = function (planet) 	// taken from vgap screen because it uses an undefined this when I need it
+	{
+		var e = Math.round(planet.nativetaxrate * planet.nativegovernment * 20 / 100 * planet.nativeclans / 1000);
+
+		var d = 1;
+		if (vgap.advActive(2)) 
+			d = 2;
+		e = e * d;
+		
+		if (planet.nativetype == 6) 
+			e = e * 2;
+
+		if (e > 5000) 
+			e = 5000;
+		
+		return e;
+	};
+	
+	vgapMap.prototype.colonistTaxAmount = function(planet)	// taken from vgap screen because it uses an undefined this when I need it
+	{
+		var a = Math.round(planet.colonisttaxrate * planet.clans / 1000);
+		var b = 1;
+		if (vgap.advActive(2)) {
+			b = 2;
+		}
+		a = a * b;
+		if (a > 5000) {
+			a = 5000;
+		}
+		return a;
 	};
 
 }

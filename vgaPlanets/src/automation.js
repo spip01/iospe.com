@@ -26,11 +26,17 @@ function wrapper () { // automation.js
 
         vgap.map.findNotes();
 
-		for (var i = 0; i < vgap.myplanets.length; i++) 
-			vgap.map.execPlanetNote(vgap.myplanets[i]);
+		for (var i = 0; i < vgap.myplanets.length; i++) {
+			var planet = vgap.myplanets[i];
+			if (planet.readystatus == 0)
+				vgap.map.execPlanetNote(planet);
+		}
 
-		for (var i = 0; i < vgap.myships.length; i++) 
-			vgap.map.execShipNote(vgap.myships[i]);
+		for (var i = 0; i < vgap.myships.length; i++) {
+			var ship = vgap.myships[i];
+			if (ship.readystatus == 0)
+				vgap.map.execShipNote(ship);
+		}
 	};
 
 	vgapMap.prototype.setColonistTaxHappy = function (planet, happy) {
@@ -299,7 +305,7 @@ function wrapper () { // automation.js
             case 2: // ship 
                 var ship = vgap.getShip(note.targetid);
                 
-                if (ship && ship.ownerid == vgap.ship.id) {
+                if (ship && ship.ownerid == vgap.player.id) {
                     if (jn.ship != undefined) {
                         ship.notesDefault = jn.ship;
                         //console.log(ship.id + " non default");
@@ -311,7 +317,143 @@ function wrapper () { // automation.js
 			}
 		}
 	};
+	
+	vgapMap.prototype.setTarget = function(ship, pt) {
+		var x = ship.x;
+		var y = ship.y;
+		
+        if (pt.planet != undefined) {
+        	if (pt.planet.id != undefined)
+        		planet = vgap.getPlanet(pt.planet.id);
+        	else
+        		planet = vgap.getPlanet(pt.planet);
+        	
+			x = planet.x;
+			y = planet.y;
+			ship.target = planet;
+		}
+		
+		if (pt.cord != undefined) {
+			x = Number(pt.cord.x);
+			y = Number(pt.cord.y);
+			ship.target = null;
+		}
+		
+        ship.targetx = x;
+        ship.targety = y;
+        ship.warp = ship.engineid;
+	
+        return (ship.x == x && ship.y == y);
+	};
+	
+	vgapMap.prototype.autoWaypoint = function(ship, jn) {
+        var g;
+        var h;
+        var pt = {};
+        
+        var d = { "arrow-end":"classic-wide-long", stroke: "yellow", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 };
+        
+        for (var i=0; i<jn.length; ++i) {
+        	pt = jn[i]; 
+        	
+        	this.setTarget(ship, pt);
+        		
+            var n = vgap.map.screenX(ship.targetx);
+            var m = vgap.map.screenY(ship.targety);
+            
+        	if (i != 0) 
+        		vgap.map.waypoints.push(vgap.map.paper.path("M"+ g +"," + h + "L"+ n +"," + m).attr(d));
+        	
+        	g = n;
+        	h = m;
+        }
+        
+        if (pt.loop != undefined) {
+        	pt = jn[0];
+        	
+        	this.setTarget(ship, pt);
+        		
+            n = vgap.map.screenX(ship.targetx);
+            m = vgap.map.screenY(ship.targety);
+            
+    		vgap.map.waypoints.push(vgap.map.paper.path("M"+ g +"," + h + "L"+ n +"," + m).attr(d));
+        }
+        
+        for (var i=0; i<jn.length; ++i) {
+        	pt = jn[i];
+        	
+        	if (this.setTarget(ship, pt)) {
+//        		this.checkBeam(ship, pt);
+        		
+				if (++i == jn.length) 
+					if (pt.loop == undefined)
+						break;
+					else
+						i = 0;
+				
+				pt = jn[i];
+				this.setTarget(ship, pt);
+	        	break;
+			}
+        }
+        
+        if (ship.x != ship.targetx || ship.y != ship.targety) {
+        	var dist = vgap.map.getDist(ship.x, ship.y, ship.targetx, ship.targety);
+        	var speed = ship.warp * ship.warp;
+        	if (dist > (speed + (ship.target != undefined && ship.target.isPlanet) ? 3 : 0)) {
+        		var a = Math.acos((ship.targetx - ship.x) / dist);
+        		ship.targetx = ship.x + Math.round(Math.cos(a) * speed);
+        		if (ship.targety > ship.y)
+        			ship.targety = ship.y + Math.round(Math.sin(a) * speed);
+        		else
+        			ship.targety = ship.y - Math.round(Math.sin(a) * speed);
+        		ship.target = null;
+        		var turns = dist / speed - 1;
+        		ship.waypoints = [];
+        		var lastx = ship.targetx;
+        		var lasty = ship.targety;
+                var d = { "arrow-end":"classic-wide-long", stroke: "yellow", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 };
+        		for (var j=0; j<turns; ++j) {
+        			dist -= speed;
+        			if (dist < speed)
+        				speed = dist;
+        			ship.waypoints[j] = {};
+            		ship.waypoints[j].x = lastx + Math.round(Math.cos(a) * speed);
+            		if (ship.targety > ship.y)
+                		ship.waypoints[j].y = lasty + Math.round(Math.sin(a) * speed);
+            		else
+            			ship.waypoints[j].y = lasty - Math.round(Math.sin(a) * speed);
+                    var g = vgap.map.screenX(lastx);
+                    var h = vgap.map.screenY(lasty);
+                    
+                    var n = vgap.map.screenX(ship.waypoints[j].x);
+                    var m = vgap.map.screenY(ship.waypoints[j].y);
+                    
+            		vgap.map.waypoints.push(vgap.map.paper.path("M"+ g +"," + h + "L"+ n +"," + m).attr(d));
 
+            		lastx = ship.waypoints[j].x;
+            		lasty = ship.waypoints[j].y;
+        		}
+        	}
+        	
+        	ship.changed = 1;
+        	ship.readystatus = 1;
+        }
+        
+        vgap.map.drawLeg(ship);
+	};
+	
+	vgapMap.prototype.drawLeg = function(ship) {
+        var g = vgap.map.screenX(ship.x);
+        var h = vgap.map.screenY(ship.y);
+        
+        var n = vgap.map.screenX(ship.targetx);
+        var m = vgap.map.screenY(ship.targety);
+        
+        var d = { "arrow-end":"classic-wide-long", stroke: "red", "stroke-width": 2 * this.zoom, "stroke-opacity": 1 };
+		vgap.map.waypoints.push(vgap.map.paper.path("M"+ g +"," + h + "L"+ n +"," + m).attr(d));
+	};
+	
 	vgapMap.prototype.execShipNote = function (ship) {
         var g = vgap.map.screenX(ship.x);
         var h = vgap.map.screenY(ship.y);
@@ -327,11 +469,23 @@ function wrapper () { // automation.js
 		if (jn.friendlycode != undefined) 
 			vgap.map.setFC(ship, jn.friendlycode);
 		
+		if (jn.waypoint != undefined) {
+			if (jn.waypoint.target != undefined) {
+				if (ship.x != ship.targetx || ship.y != ship.targety) {
+					vgap.map.drawLeg(ship);
+					ship.changed = 1;
+					ship.readystatus = 1;
+				}	
+			}
+			else
+			    vgap.map.autoWaypoint(ship, jn.waypoint);
+		}
+		
 		if (ship.changed > 0) {
 			vgap.singleSave({ship:ship});
 			this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "brown", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
 		}
-};
+	};
 	
     vgapMap.prototype.execPlanetNote = function (planet) {
         var g = vgap.map.screenX(planet.x);
@@ -358,9 +512,6 @@ function wrapper () { // automation.js
 		if (jn["nattax-happy"] != undefined && planet.nativeclans > 0) {
 			vgap.map.setNativeTaxHappy(planet, Number(jn["nattax-happy"]));
 		}
-		
-		if (jn.friendlycode != undefined) 
-			vgap.map.setFC(planet, jn.friendlycode);
 		
 		if (planet.clans == 1 || Math.floor((planet.supplies + planet.megacredits) / 4) < 1) {
 			planet.readystatus = 1;
@@ -391,6 +542,9 @@ function wrapper () { // automation.js
 				planet.readystatus = 1;
 		}
 
+		if (jn.friendlycode != undefined) 
+			vgap.map.setFC(planet, jn.friendlycode);
+		
 		if (planet.changed > 0) {
 			vgap.singleSave({planet:planet});
 			this.explosions.push(this.paper.circle(g, h, 10 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
