@@ -1,9 +1,7 @@
 //==UserScript==
 //@name          planets.nu automation
 //@description   add colony automation scripts from planet notes
-//@include       http://planets.nu/home
-//@include       http://planets.nu/games/*
-//@include       http://play.planets.nu/*
+// @include       http://*.planets.nu/*
 //@version 1.0
 //==/UserScript==
 

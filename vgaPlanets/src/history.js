@@ -1,11 +1,9 @@
 // ==UserScript==
 // @name          Planets.nu game history
 // @description   Show game history
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
-// @include       http://play.planets.nu/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-game-history
-// @version 1.0
+// @version 1.2
 // ==/UserScript==
 
 function wrapper () { // history.js

@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name          Planets.nu map ship display
 // @description   new ship display on vga map screen.
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-display-individual-ships-on-map-screen
-// @version 1.10
+// @version 1.2
 // ==/UserScript==
 
 function wrapper () { // wrapper for injection

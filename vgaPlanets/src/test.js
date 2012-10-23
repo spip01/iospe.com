@@ -1,10 +1,8 @@
 //==UserScript==
 //@name          Clan Display and Temperature addon for Planets.nu Starmap v1.1
 //@description   Add Clan, Temperature, and Ownership display added to Map Tools within Planets.nu map
-//@include       http://planets.nu/home
-//@include       http://planets.nu/games/*
-//@include       http://play.planets.nu/*
-//@version 1.1
+// @include       http://*.planets.nu/*
+//@version 0.0
 //==/UserScript==
 
 function wrapper () { // test.js

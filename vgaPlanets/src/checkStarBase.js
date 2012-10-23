@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name          Planets.nu check for material to build starbase
 // @description   Circles planets with enough materials to build a starbase.  Estimates how many turns off that may be.
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-check-material-to-build-starbase
-// @version 1.0
+// @version 1.3
 // ==/UserScript==
 
 function wrapper () {	// checkstarbase.js

@@ -1,9 +1,7 @@
 // ==UserScript==
 // @name          Planets.nu map draw
 // @description   new map drawing routines.  library for other modules
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
-// @include       http://play.planets.nu/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/
 // @version 1.0
 // ==/UserScript==

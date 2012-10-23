@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name          Planets.nu add chunnel dicrection arrows
 // @description   add arrows to starting end of chunnel.
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-add-direction-arrows-to-chunnel-waypoint
-// @version 1.12
+// @version 1.2
 // ==/UserScript==
 
 function wrapper () { // chunnelArrows.js

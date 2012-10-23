@@ -1,10 +1,9 @@
 // ==UserScript==
 // @name          Planets.nu set player colors
 // @description   set player colors on option screen. shows sample planet gradient and sample waypoint.
-// @include       http://planets.nu/home
-// @include       http://planets.nu/games/*
+// @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/
-// @version 1.00
+// @version 1.0
 // ==/UserScript==
 
 function wrapper () {	// playerColors.js

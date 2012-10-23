@@ -1,18 +1,13 @@
 //==UserScript==
 //@name          planets.nu hit text
 //@description   add more information and options to hit text
-//@include       http://planets.nu/home
-//@include       http://planets.nu/games/*
-//@include       http://play.planets.nu/*
+// @include       http://*.planets.nu/*
 //@version 1.0
 //==/UserScript==
 
 function wrapper () { // hitText.js
 	
 	vgapMap.prototype.hitTextBox = function(hit) {
-		
-		/*************** need option for this ***************/
-        localStorage.showCargoOnCombat = "false";
 		
 	    var txt = "";
 	    if (hit.isPlanet) { //planet
@@ -34,18 +29,24 @@ function wrapper () { // hitText.js
 	            if (hit.nativeclans > 0) {
 	                txt += "<tr><td colspan='4'>" + addCommas(hit.nativeclans * 100) + " " + hit.nativeracename + " - " + hit.nativegovernmentname + "</td></tr>";
 	            }
-				var neu = vgap.map.mining(hit, hit.densityneutronium, hit.groundneutronium);
-				var tri = vgap.map.mining(hit, hit.densitytritanium, hit.groundtritanium);
-				var dur = vgap.map.mining(hit, hit.densityduranium, hit.groundduranium);
-				var mol = vgap.map.mining(hit, hit.densitymolybdenum, hit.groundmolybdenum);
-				var tax = vgap.map.nativeTaxAmount(hit) + vgap.map.colonistTaxAmount(hit);
-				
-				txt += 
-	            "<tr> <td>Neutronium: </td><td>&nbsp;" + gsv(hit.neutronium) + " / " + gsv(hit.groundneutronium) + " / " + gsv(neu) + "&nbsp;<td>Colonists: </td><td>&nbsp;" + addCommas(gsv(hit.clans * 100)) + "</td></tr>" + 
-	            "<tr> <td>Duranium: </td><td>&nbsp;" + gsv(hit.duranium) + " / " + gsv(hit.groundduranium) + " / " + gsv(dur) + "&nbsp;</td>" + "<td>Supplies: </td><td>&nbsp;" + gsv(hit.supplies) + " / " + gsv(hit.factories) + "</td></tr>" + 
-	            "<tr> <td>Tritanium: </td><td>&nbsp;" + gsv(hit.tritanium) + " / " + gsv(hit.groundtritanium) + " / " + gsv(tri) + "&nbsp;</td>" + "<td>Megacredits: </td><td>&nbsp;" + gsv(hit.megacredits) + " / " + gsv(tax) + "</td></tr>" + 
-	            "<tr> <td>Molybdenum: </td><td>&nbsp;" + gsv(hit.molybdenum) + " / " + gsv(hit.groundmolybdenum) + " / " + gsv(mol) + "&nbsp;</td>" + "<td>Taxes: </td><td>&nbsp;" + gsv(hit.colonisttaxrate) + "&#37; / " + gsv(hit.nativetaxrate) + "&#37;</td></tr>";
-	            //known planet
+	            
+	            if (hit.groundneutronium != -1) {
+					var neu = vgap.map.mining(hit, hit.densityneutronium, hit.groundneutronium);
+					var tri = vgap.map.mining(hit, hit.densitytritanium, hit.groundtritanium);
+					var dur = vgap.map.mining(hit, hit.densityduranium, hit.groundduranium);
+					var mol = vgap.map.mining(hit, hit.densitymolybdenum, hit.groundmolybdenum);
+					var tax = vgap.map.nativeTaxAmount(hit) + vgap.map.colonistTaxAmount(hit);
+					
+					txt += 
+		            "<tr> <td>Neutronium:&nbsp;</td><td>" + gsv(hit.neutronium) + " / " + gsv(hit.groundneutronium) + " / " + gsv(neu) + "&nbsp;</td><td>Colonists:&nbsp;</td><td>" + addCommas(gsv(hit.clans * 100)) + "</td></tr>" + 
+		            "<tr> <td>Duranium:&nbsp;</td><td>" + gsv(hit.duranium) + " / " + gsv(hit.groundduranium) + " / " + gsv(dur) + "&nbsp;</td><td>Supplies:&nbsp;</td><td>" + gsv(hit.supplies) + " / " + gsv(hit.factories) + "</td></tr>" + 
+		            "<tr> <td>Tritanium:&nbsp;</td><td>" + gsv(hit.tritanium) + " / " + gsv(hit.groundtritanium) + " / " + gsv(tri) + "&nbsp;</td><td>Megacredits:&nbsp;</td><td>" + gsv(hit.megacredits) + " / " + gsv(tax) + "</td></tr>" + 
+		            "<tr> <td>Molybdenum:&nbsp;</td><td>" + gsv(hit.molybdenum) + " / " + gsv(hit.groundmolybdenum) + " / " + gsv(mol) + "&nbsp;</td><td>Taxes:&nbsp;</td><td>" + gsv(hit.colonisttaxrate) + "&#37; / " + gsv(hit.nativetaxrate) + "&#37;</td></tr>";
+	            }
+	            else 
+		            txt += "<tr><td>Info:&nbsp;</td><td>" + hit.infoturn + "&nbsp;</td><td>Colonists:&nbsp;</td><td>" + addCommas(gsv(hit.clans * 100)) + "</td></tr>";
+	            	
+				//known planet
 	            if (hit.ownerid != vgap.player.id && hit.ownerid != 0) {
 	                var player = vgap.getPlayer(hit.ownerid);
 	                var race = vgap.getRace(player.raceid);
@@ -97,22 +98,23 @@ function wrapper () { // hitText.js
 		            html += "<td>&nbsp;Clans:</td><td>&nbsp;" + gsv(ship.clans) + "</td>";
 	            html += "</tr>";
 	            if (ship.duranium + ship.tritanium + ship.molybdenum > 0) {
-		            html += "<tr><td>Duranium:</td><td>&nbsp;" + gsv(ship.duranium) + "</td>";
-		            html += "<td>&nbsp;Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td></tr>";
-		            html += "<tr><td>Tritanium:</td><td>&nbsp;" + gsv(ship.tritanium) + "</td>";
-		            html += "<td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr>";
-		            html += "<tr><td>Molybdenum:</td><td>&nbsp;" + gsv(ship.molybdenum) + "</td>";
+		            html += "<tr><td>Duranium:&nbsp;</td><td>" + gsv(ship.duranium) + "&nbsp;</td>";
+		            html += "<td>Supplies:&nbsp;</td><td>" + gsv(ship.supplies) + "</td></tr>";
+		            html += "<tr><td>Tritanium:&nbsp;</td><td>" + gsv(ship.tritanium) + "&nbsp;</td>";
+		            html += "<td>Megacredits:&nbsp;</td><td>" + gsv(ship.megacredits) + "</td></tr>";
+		            html += "<tr><td>Molybdenum:&nbsp;</td><td>" + gsv(ship.molybdenum) + "</td></tr>";
 	            }
 	            else if (ship.supplies + ship.megacredits > 0) {
-		            html += "<tr><td>Supplies:</td><td>&nbsp;" + gsv(ship.supplies) + "</td>";
-		            html += "<td>&nbsp;Megacredits:</td><td>&nbsp;" + gsv(ship.megacredits) + "</td></tr><tr>";
+		            html += "<tr><td>Supplies:&nbsp;</td><td>" + gsv(ship.supplies) + "&nbsp;</td>";
+		            html += "<td>Megacredits:&nbsp;</td><td>" + gsv(ship.megacredits) + "</td></tr>";
 	            }
 	            
 	            if (ship.torps > 0 || ship.bays > 0) {
-	                var ammoText = "&nbsp;Fighters";
+	            	html += "<tr>";
+	                var ammoText = "Fighters";
 	                if (ship.torps > 0)
-	                    ammoText = "&nbsp;Torpedos lvl" + gsv(ship.torpedoid);
-	                html += "<td>" + ammoText + ": </td><td>&nbsp;" + gsv(ship.ammo) + "</td></tr>";
+	                    ammoText = "Torpedos lvl" + gsv(ship.torpedoid);
+	                html += "<td>" + ammoText + ":&nbsp;</td><td>" + gsv(ship.ammo) + "</td></tr>";
 	            }
 	            
 	            //html += this.hitText(hit, hit.isPlanet);
@@ -126,8 +128,8 @@ function wrapper () { // hitText.js
 	            html += "<tr><td colspan='2'>" + ship.id + ": " + hull.name + "</td></tr>";
 	            html += "<tr><td colspan='2'>" + ship.x + " : " + ship.y + "</td></tr>";
 	            html += "<tr><td colspan='2'>" + hull.name + "</td></tr>";
-	            html += "<tr><td>Heading:</td><td>&nbsp;" + gsv(ship.heading) + " at Warp: " + gsv(ship.warp) + "</td></tr>";
-	            html += "<tr><td>Mass: </td><td>&nbsp;" + gsv(ship.mass) + "</td></tr>";
+	            html += "<tr><td>Heading:&nbsp;</td><td>" + gsv(ship.heading) + " at Warp: " + gsv(ship.warp) + "</td></tr>";
+	            html += "<tr><td>Mass:&nbsp;</td><td>" + gsv(ship.mass) + "</td></tr>";
 	            html += "<tr><td colspan='2'>" + race.name + " (" + player.username + ")" + "</td></tr>";
 	            //html += "<tr><td>Neutronium:</td><td>?/" + hull.fueltank + " </td><td>&nbsp;Total Cargo:</td><td>?/" + hull.cargo + "</td></tr>";
 	            //html += this.hitText(hit, hit.isPlanet);
