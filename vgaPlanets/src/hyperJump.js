@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          Planets.nu better hyperjump circles
 // @description   Circles planets that can be jumped to.  Gets rid of ribbon that covered up other objects.
+// @include       http://planets.nu/*
 // @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/better-hyperjump-circles
-// @version 1.3
+// @version 1.31
 // ==/UserScript==
 
 function wrapper () {	// hyperJump.js

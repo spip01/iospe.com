@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          Planets.nu map ship display
 // @description   new ship display on vga map screen.
+// @include       http://planets.nu/*
 // @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-display-individual-ships-on-map-screen
-// @version 1.2
+// @version 1.21
 // ==/UserScript==
 
 function wrapper () { // wrapper for injection
@@ -26,8 +27,8 @@ function wrapper () { // wrapper for injection
 	var oldDeselectAll = vgaPlanets.prototype.deselectAll;
 	
 	vgaPlanets.prototype.deselectAll = function() {
-		if (vgap.map.ships !== undefined)
-			vgap.map.ships.clear();
+		if (vgap.map.explosions !== undefined)
+			vgap.map.explosions.clear();
 
         oldDeselectAll.apply(this, arguments);
 	};
@@ -118,10 +119,6 @@ function wrapper () { // wrapper for injection
 		var offy = vgap.map.shipListOffset;
 		var colors = ["aqua", "fuchsia", "lime", "red", "yellow", "blue", "green", "purple", "silver", "teal", "maroon", "navy", "gray", "olive", "white"];
 
-		if (this.ships === undefined)
-	        this.ships = this.paper.set();
-        this.ships.clear();
-	    
     	var hull = vgap.getArray(nudata.hulls, id);
 		var b = "<li onclick='' style=color:"+colors[offy]+" disabled='disabled'>"+hull.name+"</li>";
     	$("#shipList ul li:contains("+hull.name+")").replaceWith(b);
@@ -135,7 +132,7 @@ function wrapper () { // wrapper for injection
 				if ((ship = ships[j]) != null) {
 					if (ship.hullid == id) {
 						
-						vgap.map.ships.push(vgap.map.paper.rect(vgap.map.screenX(ship.x) + offx * 6, vgap.map.screenY(ship.y) + offy * 7, 4, 4).attr({"fill":colors[offy],"opacity":1}));
+						vgap.map.explosions.push(vgap.map.paper.rect(vgap.map.screenX(ship.x) + offx * 6, vgap.map.screenY(ship.y) + offy * 7, 4, 4).attr({"fill":colors[offy],"opacity":1}));
 						++offx;
 					}
 				}

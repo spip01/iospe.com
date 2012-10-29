@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          planets.nu display minerals
 // @description   add check box to map screen to display minerals on planets and ships
+// @include       http://planets.nu/*
 // @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-show-minerals-checkboxes
-// @version 1.2
+// @version 1.21
 // ==/UserScript==
 
 function wrapper () { // showMinerals.js

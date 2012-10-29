@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          Planets.nu hide notes display on map
 // @description   hide notes box drawn around planets.
+// @include       http://planets.nu/*
 // @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-hide-notes-display
-// @version 1.3
+// @version 1.31
 // ==/UserScript==
 
 function wrapper () {	// notesDisplay.js

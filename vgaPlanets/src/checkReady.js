@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name          Planets.nu check for ready
 // @description   Circles planets, ships & starbases that are not marked ready.
+// @include       http://planets.nu/*
 // @include       http://*.planets.nu/*
 // @homepage      http://planets.nu/discussion/utility-script-marks-objects-not-ready
-// @version 1.3
+// @version 1.31
 // ==/UserScript==
 
 function wrapper () { // checkready.js
