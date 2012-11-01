@@ -1,0 +1,23 @@
+{
+   "name": "iospe",
+   "version": "0.0.1",
+   "manifest_version": 2,
+   
+   "content_scripts": [ {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "exclude_globs": [ "http://*.orchidspecies.com/", "http://*.orchidspecies.com/index*.htm" ],
+      "include_globs": [ "http://*.orchidspecies.com/*" ],
+      "js": [ "addList.js" ],
+      "run_at": "document_idle"
+   },{
+      "matches": [ "http://*/*", "https://*/*" ],
+      "include_globs": [ "http://*.orchidspecies.com/" ],
+      "js": [ "showList.js" ],
+      "run_at": "document_idle"
+   },{
+      "matches": [ "http://*/*", "https://*/*" ],
+      "include_globs": [ "http://*.orchidspecies.com/index*.htm" ],
+      "js": [ "showIndex.js" ],
+      "run_at": "document_idle"
+   } ]
+}
