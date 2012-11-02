@@ -229,6 +229,30 @@ function wrapper () { // hitText.js
 		return a;
 	};
 
+    vgapMap.prototype.mineText = function(x, y) {
+        var txt = "";
+        for (var i = 0; i < vgap.minefields.length; i++) {
+            var minefield = vgap.minefields[i];
+            if (this.getDist(minefield.x, minefield.y, x, y) <= minefield.radius) {
+                txt += "<div class='ItemSelectionBox minCorrection'><span>";
+                if (minefield.ownerid == vgap.player.id)
+                    txt += "Your Minefield ";
+                else {
+                    var player = vgap.getPlayer(minefield.ownerid);
+                    var race = vgap.getRace(player.raceid);
+                    txt += race.adjective + " Minefield ";
+                }
+                txt += "Id:" + minefield.id + "</span>";
+                txt += "<table class='CleanTable'>";
+                txt += "<tr><td> Radius: </td><td> " + gsv(minefield.radius) + " </td><td>&nbsp;Mines: </td><td> " + gsv(minefield.units) + " </td></tr>";
+                txt += "<tr><td> Friendly: </td><td> " + gsv(minefield.friendlycode) + " </td></tr>";
+                txt += "</table></div>";
+            }
+        }
+        return txt;
+    };
+
+
 }
 	
 var script = document.createElement("script");

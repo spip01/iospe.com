@@ -295,8 +295,8 @@ function wrapper () { // draw.js
 	        this.minefields.remove();
         this.minefields = this.paper.set();
 
-    	for (var c = 0; c < vgap.minefields.length; c++) {
-            var d = vgap.minefields[c];
+    	for (var i = 0; i < vgap.minefields.length; i++) {
+            var d = vgap.minefields[i];
 		    var c = this.getColors(d.ownerid);
             var a = {stroke:c.start, "stroke-width":1, "stroke-opacity":0.5, fill:c.start, "fill-opacity":0.2};
             this.minefields.push(this.paper.circle(this.screenX(d.x), this.screenY(d.y), d.radius * this.zoom).attr(a));

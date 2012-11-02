@@ -23,7 +23,7 @@ function wrapper () { // automation.js
         this.explosions = this.paper.set();
 
         vgap.map.findNotes();
-
+        
 		for (var i = 0; i < vgap.myplanets.length; i++) {
 			var planet = vgap.myplanets[i];
 			if (planet.readystatus == 0)
@@ -481,7 +481,7 @@ function wrapper () { // automation.js
 		
 		if (ship.changed > 0) {
 			vgap.singleSave({ship:ship});
-			this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "brown", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+			this.explosions.push(this.paper.circle(g, h, 18 * this.zoom).attr({ stroke: "brown", "stroke-width": 2, "stroke-opacity": 1 }));
 		}
 	};
 	
@@ -545,10 +545,10 @@ function wrapper () { // automation.js
 		
 		if (planet.changed > 0) {
 			vgap.singleSave({planet:planet});
-			this.explosions.push(this.paper.circle(g, h, 10 * this.zoom).attr({ stroke: "yellow", "stroke-width": 4 * this.zoom, "stroke-opacity": 1 }));
+			this.explosions.push(this.paper.circle(g, h, 15 * this.zoom).attr({ stroke: "yellow", "stroke-width": 2, "stroke-opacity": 1 }));
 		}
 	};
-
+	
 	vgaPlanets.prototype.singleSave = function(save) {
         var b = new dataObject();
         b.add("gameid", this.gameId);
@@ -572,20 +572,15 @@ function wrapper () { // automation.js
 	        ++k;
         }
         b.add("keycount", k);
-        this.saveInProgress = 2;
-        this.request("/game/save", b, function(f, save) {
-            if (f.success) {
-                if (save.planet != undefined) 
-	            	save.planet.changed = 0;
-                if (save.ship != undefined) 
-	            	save.ship.changed = 0;
-            }
-            else
-            	alert(f.error);
-            this.saveInProgress = 0;
+        
+        this.request("/game/save", b, function(f) {
+            if (save.planet != undefined) 
+                save.planet.changed = 0;
+            if (save.ship != undefined) 
+                save.ship.changed = 0;
         });
     }; 
-	
+
 }
 	
 var script = document.createElement("script");
