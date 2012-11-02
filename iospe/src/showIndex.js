@@ -52,14 +52,14 @@ function wrapper () { // showList.js
     setOwnedWanted = function(p) {
     	$("#"+p).each(function(a) {
 			var c = [];
-		    $("#"+p+" :checkbox").each(function(a) {
+		    $(this).find(":checkbox").each(function(a) {
 		        c[$(this).attr("id")] = $(this).is(":checked");
 		    });
 		    
 			var jn = {};
 			if (localStorage[p] === undefined) {
-	    		jn.url = $("#"+p+" a").attr("href");
-	    		jn.name = prompt("select name", $("#"+p+" a").text());
+	    		jn.url = $(this).find("a").attr("href");
+	    		jn.name = prompt("select name", $(this).find("a").text());
 			}
 			else 
 				jn = JSON.parse(localStorage[p]);

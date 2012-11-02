@@ -58,7 +58,7 @@ function wrapper () { // showList.js
     listOwnedWanted = function(p) {
     	$("#"+p).each(function(a) {
 			var c = [];
-		    $("#"+p+" :checkbox").each(function(a) {
+			$(this).find(":checkbox").each(function(a) {
 		        c[$(this).attr("id")] = $(this).is(":checked");
 		    });
 		    

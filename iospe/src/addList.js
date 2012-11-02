@@ -55,8 +55,14 @@ function wrapper () { // addList.js
 	    		jn.url = location.pathname;
 	    		jn.name = prompt("select name", $("p:first").text());
 			}
-			else 
+			else {
+				if (!c.owned && ! c.wanted) {
+					delete localStorage[p];
+					return;
+				}
+				
 				jn = JSON.parse(localStorage[p]);
+			}
 			
 			jn.owned = c.owned;
 			jn.wanted = c.wanted;
